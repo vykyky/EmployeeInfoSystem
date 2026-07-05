@@ -132,14 +132,21 @@ namespace EmployeeInfoSystem.Infrastructure.Persistence
 
                 entity.Property(x => x.RequestId).HasColumnName("request_id");
 
-                entity.HasOne<User>()
+                entity.HasOne(x => x.Recipient)
                       .WithMany()
                       .HasForeignKey(x => x.RecipientId)
                       .OnDelete(DeleteBehavior.NoAction);
 
-                entity.HasOne<User>()
+                // Связываем свойство Sender с внешним ключом SenderId
+                entity.HasOne(x => x.Sender)
                       .WithMany()
                       .HasForeignKey(x => x.SenderId)
+                      .OnDelete(DeleteBehavior.NoAction);
+
+                // Дополнительно: связываем свойство Request с внешним ключом RequestId
+                entity.HasOne(x => x.Request)
+                      .WithMany()
+                      .HasForeignKey(x => x.RequestId)
                       .OnDelete(DeleteBehavior.NoAction);
             });
 
@@ -158,17 +165,19 @@ namespace EmployeeInfoSystem.Infrastructure.Persistence
                 entity.Property(x => x.ResolvedAt).HasColumnName("resolved_at");
 
                 // Связи (Foreign Keys)
-                entity.HasOne<User>()
+                entity.HasOne(x => x.Employee)
                       .WithMany()
                       .HasForeignKey(x => x.EmployeeId)
                       .OnDelete(DeleteBehavior.NoAction);
 
-                entity.HasOne<User>()
+                // Связываем свойство Manager с внешним ключом ManagerId
+                entity.HasOne(x => x.Manager)
                       .WithMany()
                       .HasForeignKey(x => x.ManagerId)
                       .OnDelete(DeleteBehavior.NoAction);
 
-                entity.HasOne<RequestType>()
+                // Связываем свойство RequestType с внешним ключом RequestTypeId
+                entity.HasOne(x => x.RequestType)
                       .WithMany()
                       .HasForeignKey(x => x.RequestTypeId)
                       .OnDelete(DeleteBehavior.NoAction);
@@ -184,24 +193,7 @@ namespace EmployeeInfoSystem.Infrastructure.Persistence
                 entity.Property(x => x.IsSystem).HasColumnName("is_system");
             });
 
-            modelBuilder.Entity<RequestType>().HasData(
-                new RequestType
-                {
-                    Id = 1,
-                    Name = "Изменение контактных данных",
-                    IsActive = true,
-                    IsSystem = true,
-                    Code = "CHANGE_CONTACTS"
-                },
-                new RequestType
-                {
-                    Id = 2,
-                    Name = "Изменение размеров спецодежды",
-                    IsActive = true,
-                    IsSystem = true,
-                    Code = "CHANGE_SIZES"
-                }
-            );
+            
 
             modelBuilder.Entity<RecipientGroup>(entity =>
             {

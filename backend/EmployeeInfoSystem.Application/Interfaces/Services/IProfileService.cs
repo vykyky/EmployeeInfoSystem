@@ -11,6 +11,6 @@ namespace EmployeeInfoSystem.Application.Interfaces.Services
     public interface IProfileService
     {
         Task<Result<UserProfileDto>> GetProfileByTabnAsync(string tabn);
-        Task<Result> RequestContactChangeAsync(string tabn, ChangeContactsRequestDto dto);
+        Task<Result<int>> RequestContactChangeAsync(string tabn, ChangeContactsRequestDto dto);
     }
 }

@@ -11,6 +11,6 @@ namespace EmployeeInfoSystem.Application.Interfaces.Services
     public interface IWorkwearService
     {
         Task<Result<WorkwearDto>> GetWorkwearByTabnAsync(string tabn);
-        Task<Result> RequestSizeChangeAsync(string tabn, ChangeSizesRequestDto dto);
+        Task<Result<int>> RequestSizeChangeAsync(string tabn, ChangeSizesRequestDto dto);
     }
 }

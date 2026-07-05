@@ -44,21 +44,20 @@ namespace EmployeeInfoSystem.Application.Services
             return dto;
         }
 
-        public async Task<Result> RequestContactChangeAsync(string tabn, ChangeContactsRequestDto dto)
+        // 1. Меняем возвращаемый тип на Result<int>
+        public async Task<Result<int>> RequestContactChangeAsync(string tabn, ChangeContactsRequestDto dto)
         {
             var user = await _uow.Users.GetByTabnAsync(tabn);
             if (user is null)
                 return Error.NotFound($"Пользователь с табельным номером {tabn} не найден");
 
-            // Сами ищем тип по коду
             var requestType = await _uow.RequestTypes.GetByCodeAsync("CHANGE_CONTACTS");
             if (requestType is null)
                 return Error.NotFound("Системный тип запроса 'CHANGE_CONTACTS' не найден");
 
-            // Формируем строку нового значения на основе пришедшего DTO
             var newValue = $"Телефон: {dto.Phone ?? "(без изменений)"}, Email: {dto.Email ?? "(без изменений)"}";
 
-            // Используем твой стандартный CreateRequestDto как контейнер для передачи в RequestService
+            // 2. Теперь здесь корректно вернется Result<int>, содержащий ID
             return await _requestService.CreateAsync(user.Id, new CreateRequestDto
             {
                 RequestTypeId = requestType.Id,

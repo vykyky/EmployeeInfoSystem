@@ -51,7 +51,7 @@ namespace EmployeeInfoSystem.Application.Services
             return dto;
         }
 
-        public async Task<Result> RequestSizeChangeAsync(string tabn, ChangeSizesRequestDto dto)
+        public async Task<Result<int>> RequestSizeChangeAsync(string tabn, ChangeSizesRequestDto dto)
         {
             var user = await _uow.Users.GetByTabnAsync(tabn);
             if (user is null)

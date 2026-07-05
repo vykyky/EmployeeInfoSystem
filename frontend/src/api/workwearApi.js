@@ -22,10 +22,13 @@ export async function getWorkwear() {
 }
 
 export async function sendWorkwearUpdateRequest(clothesSize, shoesSize) {
-    const response = await fetch(`${API_URL}/api/workwear/request-change`, {
+    const response = await fetch(`${API_URL}/api/workwear/request`, {
         method: "POST",
         headers: getAuthHeaders(),
-        body: JSON.stringify({ clothesSize, shoesSize })
+        body: JSON.stringify({ 
+            clothesSize: clothesSize !== '' && clothesSize !== null ? clothesSize.toString() : null, 
+            shoesSize: shoesSize !== '' && shoesSize !== null ? shoesSize.toString() : null 
+        })
     });
 
     if (!response.ok) {

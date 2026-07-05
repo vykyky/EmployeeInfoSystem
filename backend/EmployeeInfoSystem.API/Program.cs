@@ -3,6 +3,7 @@ using EmployeeInfoSystem.Application;
 using EmployeeInfoSystem.Application.Interfaces;
 using EmployeeInfoSystem.Domain;
 using EmployeeInfoSystem.Infrastructure;
+using EmployeeInfoSystem.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
@@ -60,6 +61,7 @@ app.UseMiddleware<ExceptionMiddleware>();
 
 using (var scope = app.Services.CreateScope())
 {
+    // 1. Инициализация админа (ваш текущий код)
     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
     var adminExists = await uow.Users.GetByTabnAsync("admin");
@@ -76,6 +78,39 @@ using (var scope = app.Services.CreateScope())
 
         await uow.Users.AddAsync(admin);
         await uow.SaveChangesAsync();
+    }
+
+    // =========================================================================
+    // 2. ДИНАМИЧЕСКИЙ СИД ДЛЯ ТИПОВ ЗАПРОСОВ (Добавляем сюда)
+    // =========================================================================
+    // Достаем контекст напрямую или через репозитории (если у вас есть uow.RequestTypes)
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    // Проверяем, есть ли уже записи в таблице requesttypes
+    if (!dbContext.RequestTypes.Any())
+    {
+        var defaultTypes = new List<RequestType>
+        {
+            new RequestType
+            {
+                Id = 1,
+                Name = "Изменение контактных данных",
+                IsActive = true,
+                IsSystem = true,
+                Code = "CHANGE_CONTACTS"
+            },
+            new RequestType
+            {
+                Id = 2,
+                Name = "Изменение размеров спецодежды",
+                IsActive = true,
+                IsSystem = true,
+                Code = "CHANGE_SIZES"
+            }
+        };
+
+        await dbContext.RequestTypes.AddRangeAsync(defaultTypes);
+        await dbContext.SaveChangesAsync();
     }
 }
 

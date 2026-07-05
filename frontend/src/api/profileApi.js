@@ -24,7 +24,7 @@ export async function getProfile() {
 }
 
 export async function sendProfileUpdateRequest(phone, email) {
-    const response = await fetch(`${API_URL}/api/profile/request-change`, {
+    const response = await fetch(`${API_URL}/api/profile/request`, {
         method: "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify({ phone, email })
