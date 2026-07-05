@@ -1,0 +1,57 @@
+import { useState } from 'react';
+import { syncPpeByTabn, syncAllPpe } from '../../api/syncApi';
+
+export default function WorkwearAdmin() {
+  const [tabn, setTabn]       = useState('');
+  const [status, setStatus]   = useState(null);   // { ok: bool, message: string }
+  const [loading, setLoading] = useState(false);
+
+  async function handleSync(syncFn) {
+    setLoading(true);
+    setStatus(null);
+    try {
+      await syncFn();
+      setStatus({ ok: true, message: "Синхронизация выполнена успешно" });
+    } catch (err) {
+      setStatus({ ok: false, message: err.message });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div>
+      <h2>Спец. одежда</h2>
+
+      <input
+        placeholder="Лицевой счет"
+        value={tabn}
+        onChange={(e) => setTabn(e.target.value)}
+        disabled={loading}
+      />
+
+      <br /><br />
+
+      <button
+        onClick={() => handleSync(() => syncPpeByTabn(tabn))}
+        disabled={loading || !tabn.trim()}
+      >
+        Обновить сотрудника
+      </button>
+
+      <button
+        onClick={() => handleSync(syncAllPpe)}
+        disabled={loading}
+      >
+        Обновить всех сотрудников
+      </button>
+
+      {loading && <p>Выполняется синхронизация...</p>}
+      {status && (
+        <p style={{ color: status.ok ? 'green' : 'red' }}>
+          {status.message}
+        </p>
+      )}
+    </div>
+  );
+}

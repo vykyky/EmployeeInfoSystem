@@ -1,0 +1,116 @@
+/* layout.css */
+.layout {
+    display: flex;
+    height: calc(100vh - 100px);
+    margin: 8px 8px 16px 8px;
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+ 
+    text-align: left;
+    width: 15%;
+    min-width: 220px;
+    flex-shrink: 0;
+
+    background-color: rgb(242, 242, 242);
+    padding: 16px;
+    color: black;
+    margin: 0 8px 0 0;
+    border-radius: 12px;
+
+    overflow-y: auto;
+}
+
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-menu li {
+    margin-bottom: 2px;
+}
+
+.sidebar-menu a {
+    display: block;
+    color: black;
+    text-decoration: none;
+    font-size: 18px;
+    padding: 4px 8px;
+    border-radius: 16px;
+    transition: 0.2s;
+}
+
+.sidebar-menu a:hover {
+    background-color: rgb(84, 107, 142);
+    color: white;
+    transform: translateX(8px);
+}
+
+.sidebar-menu a.active {
+    background-color: rgb(84, 107, 142);
+    color: white;
+    transform: translateX(8px);
+}
+
+.logout-item {
+    margin-top: auto;
+}
+.sidebar-menu button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    color: black;
+    text-decoration: none;
+    font-size: 18px;
+    padding: 4px 8px;
+    border-radius: 16px;
+    transition: 0.2s;
+}
+
+.sidebar-menu button:hover {
+    background-color: rgb(84, 107, 142);
+    color: white;
+    transform: translateX(8px);
+}
+
+.content {
+    flex: 1;
+    background-color: rgb(242, 242, 242);
+
+    overflow-y: auto; 
+    height: 100%;
+}
+
+.public-content {
+    background-color: rgb(242, 242, 242);
+}
+
+.public-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 80vh; /* Гарантируем высоту на весь экран */
+    background-color: rgb(255, 255, 255);
+}
+
+.page { padding: 24px 32px; }
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.page-header h1 { font-size: 28px; font-weight: 650; margin: 0; }
+.page-header .btn { font-size: 16px; padding: 8px 20px; }

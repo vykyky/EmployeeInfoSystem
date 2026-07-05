@@ -1,0 +1,67 @@
+# ==========================================
+# 1. ASP.NET Core (Бэкенд)
+# ==========================================
+# Папки скомпилированного кода и бинарников
+[Bb]in/
+[Oo]bj/
+
+# Сгенерированные файлы публикаций
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Локальные настройки и секреты бэкенда (user secrets, local settings)
+appsettings.Development.json
+appsettings.Local.json
+*.usersecrets
+appsettings.json
+
+# Кэш инструментов .NET
+.dotnet/
+.nuget/
+*.nuget.props
+*.nuget.targets
+
+# ==========================================
+# 2. React / Node.js (Фронтенд)
+# ==========================================
+# Папка со всеми скачанными библиотеками
+node_modules/
+.pnpm-store/
+.yarn/
+
+# Папки сборки (в зависимости от того, Vite у вас или CRA)
+dist/
+build/
+out/
+
+# Локальные переменные окружения фронтенда (где могут быть ключи)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Логи ошибок npm/yarn
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
+
+# ==========================================
+# 3. Редакторы кода и ОС (IDE & OS)
+# ==========================================
+# Visual Studio Code
+.vscode/
+!.vscode/extensions.json
+
+# Visual Studio (настройки проекта)
+.vs/
+
+# JetBrains (Rider, WebStorm)
+.idea/
+
+# Операционные системы
+Thumbs.db
+.DS_Store

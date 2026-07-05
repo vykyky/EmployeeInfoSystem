@@ -1,0 +1,14 @@
+.app-footer {
+    border-top: 2px solid rgb(227, 6, 19);
+    padding: 10px 24px;
+    text-align: right;
+    font-size: 13px;
+    color: rgb(84, 107, 142);
+}
+
+.app-footer a {
+    color: rgb(84, 107, 142);
+    text-decoration: underline;
+    margin-right: 8px;
+    cursor: pointer;
+}

@@ -1,0 +1,114 @@
+.login-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 82vh;
+    background-color: rgb(255, 255, 255);
+}
+
+.login-main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.login-container {
+    width: 440px;
+    background: rgb(242, 242, 242);
+    padding: 20px 24px;
+    border-radius: 12px;
+}
+
+.page-title {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 500;
+    margin: 0 0 20px 0;
+}
+
+.login-container .form-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    margin-bottom: 8px;
+}
+
+.login-container .form-group label {
+    width: 110px;
+    flex-shrink: 0;
+    font-size: 16px;
+    margin-bottom: 0;
+    text-align: left;
+}
+
+.login-container .form-group input {
+    flex: 1;
+}
+
+.login-links {
+    text-align: center;
+    margin: 10px 0 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.login-links a {
+    font-size: 14px;
+    color: rgb(84, 107, 142);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.login-container .btn-primary {
+    width: 100%;
+    font-size: 20px;
+    padding: 8px;
+}
+
+.login-container .btn-secondary {
+    width: 100%;
+    font-size: 20px;
+    padding: 8px;
+    margin-top: 10px;
+}
+
+.input-wrapper {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding-right: 36px; /* место под иконку */
+}
+
+.eye-btn {
+    position: absolute;
+    right: 8px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.dev-buttons {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    opacity: 0.4;
+}
+
+.dev-buttons button {
+    font-size: 11px;
+    padding: 2px 8px;
+    cursor: pointer;
+}

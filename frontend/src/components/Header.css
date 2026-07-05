@@ -1,0 +1,25 @@
+.app-header {
+    background: rgb(84, 107, 142);
+    height: 64px;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    border-radius: 12px;
+    margin: 8px;
+}
+
+.app-header img {
+    height: 64px;
+    width: auto;
+}
+
+.header-news-link {
+    color: white;
+    text-decoration: none;
+    margin-left: 8px; /* утянет ссылку в правый край хэдера */
+    font-size: 15px;
+}
+
+.header-news-link:hover {
+    text-decoration: underline;
+}

@@ -1,0 +1,21 @@
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    font-size: 16px;
+    font-weight: 500;
+    padding: 10px;
+}
+
+.table td {
+    font-size: 16px;
+    font-weight: 400;
+    padding: 10px;
+}
+
+.table th,
+.table td {
+    border: 1px solid #ddd;
+}

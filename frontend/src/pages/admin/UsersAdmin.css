@@ -1,0 +1,103 @@
+/* UsersAdmin.css */
+
+.users-error {
+    color: rgb(227, 6, 19);
+}
+
+/* карточка с формой регистрации (по аналогии с .login-container) */
+.users-form-wrap {
+    background: rgb(242, 242, 242);
+    padding: 20px 24px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    max-width: 440px;
+}
+
+.users-form-title {
+    font-size: 20px;
+    font-weight: 500;
+    margin: 0 0 16px 0;
+}
+
+.users-form-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.users-form-actions .btn {
+    flex: 1;
+    font-size: 16px;
+    padding: 8px;
+}
+
+.users-field-error {
+    color: rgb(227, 6, 19);
+    font-size: 13px;
+    margin-top: 4px;
+    display: block;
+}
+
+/* поле пароля с иконкой "глаз" (как на странице входа) */
+.input-wrapper {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding-right: 36px; /* место под иконку */
+}
+
+.eye-btn {
+    position: absolute;
+    right: 8px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgb(87, 87, 86);
+}
+
+/* обёртка таблицы пользователей */
+.users-table-wrap {
+    background: rgb(242, 242, 242);
+    padding: 16px;
+    border-radius: 12px;
+    overflow-x: auto;
+}
+
+/* маленькие кнопки внутри строк таблицы */
+.btn.users-btn-sm {
+    font-size: 13px;
+    padding: 4px 12px;
+}
+
+/* инлайн-смена роли */
+.users-role-edit {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.users-role-label {
+    cursor: pointer;
+    text-decoration: underline dotted;
+}
+
+.users-role-label:hover {
+    color: rgb(84, 107, 142);
+}
+
+/* подтверждение удаления */
+.users-delete-confirm {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}

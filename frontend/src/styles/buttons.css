@@ -1,0 +1,30 @@
+.btn {
+    border: none;
+    cursor: pointer;
+    padding: 10px 24px;
+    border-radius: 6px;
+
+    font-family: 'Jost', sans-serif;
+    font-size: 24px;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background-color: rgb(84, 107, 142);
+    color: white;
+}
+
+.btn-secondary {
+    background-color: rgb(87, 87, 86);
+    color: white;
+}
+
+.btn-delete {
+    background-color: rgb(227, 6, 19);
+    color: white;
+}
+
+.btn:disabled {
+    background-color: rgb(198, 198, 198);
+    cursor: not-allowed;
+}
