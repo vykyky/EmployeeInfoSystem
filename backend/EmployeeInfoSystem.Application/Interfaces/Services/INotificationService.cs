@@ -16,12 +16,13 @@ namespace EmployeeInfoSystem.Application.Interfaces.Services
 
         // Внутренние методы -- вызываются из RequestService при смене статуса заявки
         Task NotifyNewRequestAsync(Request request);
+        Task NotifyRequestAssignedAsync(Request request);
+        Task NotifyRequestInProgressAsync(Request request);
         Task NotifyRequestResolvedAsync(Request request);
-        Task NotifyManagerAssignedAsync(Request request);
 
-        Task<List<NotificationDto>> GetMyNotificationsAsync(int userId);   // RequestId == null
-        Task<List<NotificationDto>> GetMyTasksAsync(int userId);            // RequestId != null, по получателю
-        Task<List<NotificationDto>> GetAllTasksAsync();                     // admin, без фильтра по получателю
+        Task<List<NotificationDto>> GetMyNotificationsAsync(int userId);
+        Task<List<NotificationDto>> GetMyTasksAsync(int userId);
+        Task<List<NotificationDto>> GetAllTasksAsync();
 
         Task<Result> MarkAsReadAsync(int notificationId, int userId);
     }

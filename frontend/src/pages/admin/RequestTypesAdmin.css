@@ -1,0 +1,77 @@
+/* RequestTypesAdmin.css */
+
+/* карточка с формой добавления типа (по аналогии с .users-form-wrap) */
+.rt-form-wrap {
+    background: rgb(242, 242, 242);
+    padding: 20px 24px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    max-width: 440px;
+}
+
+.rt-form-title {
+    font-size: 20px;
+    font-weight: 500;
+    margin: 0 0 16px 0;
+}
+
+.rt-form-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.rt-form-actions .btn {
+    flex: 1;
+    font-size: 16px;
+    padding: 8px;
+}
+
+.rt-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.rt-field-error {
+    color: rgb(227, 6, 19);
+    font-size: 13px;
+    margin: -8px 0 12px 0;
+}
+
+/* обёртка таблицы типов */
+.rt-wrap {
+    background: rgb(242, 242, 242);
+  
+    overflow-x: auto;
+}
+
+.rt-input {
+    padding: 6px 8px;
+    font-size: 14px;
+    font-family: 'Jost', sans-serif;
+    border: 1px solid rgb(200, 200, 200);
+    border-radius: 4px;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.rt-input:focus {
+    border-color: rgb(84, 107, 142);
+}
+
+.btn.rt-btn-sm {
+    font-size: 13px;
+    padding: 4px 12px;
+    margin-right: 6px;
+}
+
+.rt-error {
+    color: rgb(227, 6, 19);
+    font-size: 13px;
+    margin-left: 4px;
+}

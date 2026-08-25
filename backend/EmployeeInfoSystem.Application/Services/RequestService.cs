@@ -37,7 +37,7 @@ namespace EmployeeInfoSystem.Application.Services
                 RequestTypeId = dto.RequestTypeId,
                 Comment = dto.Comment,
                 NewValue = dto.NewValue,
-                Status = "new",
+                Status = "accepted",
                 ManagerId = null,
                 CreatedAt = DateTime.UtcNow
             };
@@ -45,8 +45,12 @@ namespace EmployeeInfoSystem.Application.Services
             await _uow.Requests.AddAsync(request);
             await _uow.SaveChangesAsync();
 
-            await _notificationService.NotifyNewRequestAsync(request);
-            await _uow.SaveChangesAsync();
+            var saved = await _uow.Requests.GetByIdAsync(request.Id);
+            if (saved is not null)
+            {
+                await _notificationService.NotifyNewRequestAsync(saved);
+                await _uow.SaveChangesAsync();
+            }
 
             return request.Id;
         }
@@ -66,7 +70,7 @@ namespace EmployeeInfoSystem.Application.Services
         public async Task<List<RequestDto>> GetAllAsync()
         {
             var list = await _uow.Requests.GetAllAsync();
-            return list.Select(ToDto).ToList();   // IEnumerable<T>.Select().ToList() — работает без изменений
+            return list.Select(ToDto).ToList();
         }
 
         public async Task<Result> TakeInProgressAsync(int requestId, int managerId)
@@ -78,12 +82,20 @@ namespace EmployeeInfoSystem.Application.Services
             if (request.ManagerId != managerId)
                 return Error.Forbidden("Запрос назначен другому менеджеру");
 
-            if (request.Status != "new")
-                return Error.Conflict("Запрос уже в работе или завершён");
+            // assigned — основной статус; new — совместимость со старыми записями
+            if (request.Status != "assigned" && request.Status != "new")
+                return Error.Conflict("Запрос ещё не назначен или уже в работе / завершён");
 
             request.Status = "in_progress";
             await _uow.Requests.UpdateAsync(request);
             await _uow.SaveChangesAsync();
+
+            var saved = await _uow.Requests.GetByIdAsync(requestId);
+            if (saved is not null)
+            {
+                await _notificationService.NotifyRequestInProgressAsync(saved);
+                await _uow.SaveChangesAsync();
+            }
 
             return Result.Success();
         }
@@ -107,8 +119,12 @@ namespace EmployeeInfoSystem.Application.Services
             await _uow.Requests.UpdateAsync(request);
             await _uow.SaveChangesAsync();
 
-            await _notificationService.NotifyRequestResolvedAsync(request);
-            await _uow.SaveChangesAsync();
+            var saved = await _uow.Requests.GetByIdAsync(requestId);
+            if (saved is not null)
+            {
+                await _notificationService.NotifyRequestResolvedAsync(saved);
+                await _uow.SaveChangesAsync();
+            }
 
             return Result.Success();
         }
@@ -119,16 +135,28 @@ namespace EmployeeInfoSystem.Application.Services
             if (request is null)
                 return Error.NotFound($"Запрос {requestId} не найден");
 
+            if (request.Status == "done")
+                return Error.Conflict("Нельзя назначить ответственного на завершённый запрос");
+
             var manager = await _uow.Users.GetByIdAsync(managerId);
             if (manager is null || (manager.Role != "manager" && manager.Role != "admin"))
-                return Error.Validation("Указанный пользователь не является менеджером");
+                return Error.Validation("Указанный пользователь не является менеджером или администратором");
 
             request.ManagerId = managerId;
+
+            // При первичном назначении / переназначении из «Принята» — статус «Назначена»
+            if (request.Status == "accepted" || request.Status == "new" || request.Status == "assigned")
+                request.Status = "assigned";
+
             await _uow.Requests.UpdateAsync(request);
             await _uow.SaveChangesAsync();
 
-            await _notificationService.NotifyManagerAssignedAsync(request);
-            await _uow.SaveChangesAsync();
+            var saved = await _uow.Requests.GetByIdAsync(requestId);
+            if (saved is not null)
+            {
+                await _notificationService.NotifyRequestAssignedAsync(saved);
+                await _uow.SaveChangesAsync();
+            }
 
             return Result.Success();
         }
@@ -145,7 +173,7 @@ namespace EmployeeInfoSystem.Application.Services
             NewValue = r.NewValue,
             Status = r.Status,
             ManagerId = r.ManagerId,
-            ManagerFio = r.Manager?.EmployeeProfile?.Fio,
+            ManagerFio = r.Manager?.EmployeeProfile?.Fio ?? r.Manager?.Tabn,
             ResolutionComment = r.ResolutionComment,
             CreatedAt = r.CreatedAt,
             ResolvedAt = r.ResolvedAt

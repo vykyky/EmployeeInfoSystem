@@ -5,6 +5,7 @@ import {
     updateRequestType,
     deleteRequestType
 } from '../../api/requestTypesApi';
+import './RequestTypesAdmin.css';
 
 export default function RequestTypes() {
     const [types, setTypes] = useState([]);
@@ -12,6 +13,7 @@ export default function RequestTypes() {
     const [error, setError] = useState(null);
 
     // Форма добавления
+    const [showForm, setShowForm] = useState(false);
     const [newName, setNewName] = useState('');
     const [newActive, setNewActive] = useState(true);
     const [createError, setCreateError] = useState(null);
@@ -41,7 +43,8 @@ export default function RequestTypes() {
             });
     }
 
-    async function handleCreate() {
+    async function handleCreate(e) {
+        e.preventDefault();
         if (!newName.trim()) {
             setCreateError('Введите название');
             return;
@@ -52,12 +55,20 @@ export default function RequestTypes() {
             await createRequestType({ name: newName.trim(), isActive: newActive });
             setNewName('');
             setNewActive(true);
+            setShowForm(false);
             loadTypes();
         } catch (err) {
             setCreateError(err.message);
         } finally {
             setCreating(false);
         }
+    }
+
+    function handleCancelForm() {
+        setShowForm(false);
+        setNewName('');
+        setNewActive(true);
+        setCreateError(null);
     }
 
     function startEdit(type) {
@@ -100,113 +111,152 @@ export default function RequestTypes() {
         }
     }
 
-    if (loading) return <div>Загрузка...</div>;
-    if (error) return <div>Ошибка: {error}</div>;
+    if (loading) return <div className="page">Загрузка...</div>;
+    if (error) return <div className="page rt-error">Ошибка: {error}</div>;
 
     return (
-        <div>
-            <h2>Электронный запрос — типы</h2>
+        <div className="page">
+            <div className="page-header">
+                <button
+                    className="btn btn-primary"
+                    onClick={() => setShowForm(true)}
+                >
+                    Добавить тип
+                </button>
+            </div>
 
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>Название</th>
-                        <th>Активен</th>
-                        <th>Системный</th>
-                        <th>Действия</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {types.map(type => (
-                        <tr key={type.id}>
-                            {editingId === type.id ? (
-                                <>
-                                    <td>
-                                        <input
-                                            value={editName}
-                                            onChange={(e) => setEditName(e.target.value)}
-                                            disabled={editLoading}
-                                        />
-                                    </td>
-                                    <td>
-                                        <input
-                                            type="checkbox"
-                                            checked={editActive}
-                                            onChange={(e) => setEditActive(e.target.checked)}
-                                            disabled={editLoading || type.isSystem}
-                                        />
-                                    </td>
-                                    <td>{type.isSystem ? 'Да' : 'Нет'}</td>
-                                    <td>
-                                        <button
-                                            type="button"
-                                            onClick={() => handleUpdate(type)}
-                                            disabled={editLoading}
-                                        >
-                                            Сохранить
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={cancelEdit}
-                                            disabled={editLoading}
-                                        >
-                                            Отмена
-                                        </button>
-                                        {editError && <span style={{ color: 'red' }}> {editError}</span>}
-                                    </td>
-                                </>
-                            ) : (
-                                <>
-                                    <td>{type.name}</td>
-                                    <td>{type.isActive ? 'Да' : 'Нет'}</td>
-                                    <td>{type.isSystem ? 'Да' : 'Нет'}</td>
-                                    <td>
-                                        <button type="button" onClick={() => startEdit(type)}>
-                                            Изменить
-                                        </button>
-                                        {!type.isSystem && (
-                                            <button type="button" onClick={() => handleDelete(type.id)}>
-                                                Удалить
-                                            </button>
-                                        )}
-                                    </td>
-                                </>
-                            )}
-                        </tr>
-                    ))}
-
-                    {/* Строка добавления нового типа */}
-                    <tr>
-                        <td>
+            {showForm && (
+                <div className="rt-form-wrap">
+                    <h2 className="rt-form-title">Новый тип заявки</h2>
+                    <form onSubmit={handleCreate} noValidate>
+                        <div className="form-group">
+                            <label>Название</label>
                             <input
                                 value={newName}
                                 onChange={(e) => setNewName(e.target.value)}
-                                placeholder="Название нового типа"
+                                placeholder="Название типа"
                                 disabled={creating}
+                                autoComplete="off"
                             />
-                        </td>
-                        <td>
-                            <input
-                                type="checkbox"
-                                checked={newActive}
-                                onChange={(e) => setNewActive(e.target.checked)}
-                                disabled={creating}
-                            />
-                        </td>
-                        <td>—</td>
-                        <td>
+                        </div>
+
+                        <div className="form-group">
+                            <label className="rt-checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={newActive}
+                                    onChange={(e) => setNewActive(e.target.checked)}
+                                    disabled={creating}
+                                />
+                                Активен
+                            </label>
+                        </div>
+
+                        {createError && <p className="rt-field-error">{createError}</p>}
+
+                        <div className="rt-form-actions">
                             <button
                                 type="button"
-                                onClick={handleCreate}
+                                className="btn btn-secondary"
+                                onClick={handleCancelForm}
+                                disabled={creating}
+                            >
+                                Отмена
+                            </button>
+                            <button
+                                type="submit"
+                                className="btn btn-primary"
                                 disabled={creating || !newName.trim()}
                             >
-                                Добавить
+                                {creating ? "Добавление..." : "Добавить"}
                             </button>
-                            {createError && <span style={{ color: 'red' }}> {createError}</span>}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                        </div>
+                    </form>
+                </div>
+            )}
+
+            <div className="rt-wrap">
+                <table className="table">
+                    <thead>
+                        <tr>
+                            <th>Название</th>
+                            <th>Активен</th>
+                            <th>Системный</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {types.map(type => (
+                            <tr key={type.id}>
+                                {editingId === type.id ? (
+                                    <>
+                                        <td>
+                                            <input
+                                                className="rt-input"
+                                                value={editName}
+                                                onChange={(e) => setEditName(e.target.value)}
+                                                disabled={editLoading}
+                                            />
+                                        </td>
+                                        <td>
+                                            <input
+                                                type="checkbox"
+                                                checked={editActive}
+                                                onChange={(e) => setEditActive(e.target.checked)}
+                                                disabled={editLoading || type.isSystem}
+                                            />
+                                        </td>
+                                        <td>{type.isSystem ? 'Да' : 'Нет'}</td>
+                                        <td>
+                                            <button
+                                                type="button"
+                                                className="btn btn-primary rt-btn-sm"
+                                                onClick={() => handleUpdate(type)}
+                                                disabled={editLoading}
+                                            >
+                                                Сохранить
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="btn btn-secondary rt-btn-sm"
+                                                onClick={cancelEdit}
+                                                disabled={editLoading}
+                                            >
+                                                Отмена
+                                            </button>
+                                            {editError && <span className="rt-error">{editError}</span>}
+                                        </td>
+                                    </>
+                                ) : (
+                                    <>
+                                        <td>{type.name}</td>
+                                        <td>{type.isActive ? 'Да' : 'Нет'}</td>
+                                        <td>{type.isSystem ? 'Да' : 'Нет'}</td>
+                                        <td>
+                                            <button
+                                                type="button"
+                                                className="btn btn-secondary rt-btn-sm"
+                                                onClick={() => startEdit(type)}
+                                            >
+                                                Изменить
+                                            </button>
+                                            {!type.isSystem && (
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-delete rt-btn-sm"
+                                                    onClick={() => handleDelete(type.id)}
+                                                >
+                                                    Удалить
+                                                </button>
+                                            )}
+                                        </td>
+                                    </>
+                                )}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }

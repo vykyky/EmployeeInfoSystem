@@ -2,17 +2,22 @@ import { useState, useEffect } from 'react';
 import { getAllRequests, takeRequest, completeRequest } from '../../api/requestsApi';
 
 const STATUS_LABELS = {
-    new: 'Новая',
+    accepted: 'Принята',
+    new: 'Принята',
+    assigned: 'Назначена',
     in_progress: 'В работе',
     done: 'Выполнена'
 };
+
+function getCommentText(task) {
+    return task.newValue || task.comment || '—';
+}
 
 export default function Tasks() {
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Выбранная задача для редактирования
     const [selected, setSelected] = useState(null);
     const [resolutionComment, setResolutionComment] = useState('');
     const [actionLoading, setActionLoading] = useState(false);
@@ -35,9 +40,21 @@ export default function Tasks() {
             });
     }
 
+    async function refreshAndKeepSelected(keepSelectedId) {
+        const data = await getAllRequests();
+        setTasks(data);
+        if (keepSelectedId != null) {
+            const refreshed = data.find(t => t.id === keepSelectedId);
+            if (refreshed) {
+                setSelected(refreshed);
+                setResolutionComment(refreshed.resolutionComment || '');
+            }
+        }
+    }
+
     function handleSelect(task) {
         setSelected(task);
-        setResolutionComment('');
+        setResolutionComment(task.resolutionComment || '');
         setActionError(null);
     }
 
@@ -51,8 +68,7 @@ export default function Tasks() {
         setActionError(null);
         try {
             await takeRequest(selected.id);
-            loadTasks();
-            handleClose();
+            await refreshAndKeepSelected(selected.id);
         } catch (err) {
             setActionError(err.message);
         } finally {
@@ -69,8 +85,7 @@ export default function Tasks() {
         setActionError(null);
         try {
             await completeRequest(selected.id, resolutionComment);
-            loadTasks();
-            handleClose();
+            await refreshAndKeepSelected(selected.id);
         } catch (err) {
             setActionError(err.message);
         } finally {
@@ -86,8 +101,9 @@ export default function Tasks() {
     if (loading) return <div>Загрузка задач...</div>;
     if (error) return <div>Ошибка: {error}</div>;
 
-    // Режим редактирования задачи (Рис. 16)
     if (selected) {
+        const isDone = selected.status === 'done';
+
         return (
             <div>
                 <button type="button" onClick={handleClose}>← Назад</button>
@@ -96,47 +112,44 @@ export default function Tasks() {
 
                 <p><strong>Тип:</strong> {selected.requestTypeName}</p>
                 <p><strong>Сотрудник:</strong> {selected.employeeFio || selected.employeeTabn || '—'}</p>
-                <p><strong>Комментарий:</strong> {selected.comment || '—'}</p>
-                <p><strong>Новое значение:</strong> {selected.newValue || '—'}</p>
+                <p><strong>Комментарий:</strong> {getCommentText(selected)}</p>
                 <p><strong>Статус:</strong> {STATUS_LABELS[selected.status] || selected.status}</p>
+                <p><strong>Ответственный:</strong> {selected.managerFio || '—'}</p>
                 <p><strong>Дата создания:</strong> {formatDate(selected.createdAt)}</p>
 
-                <div>
-                    <label>Описание решения</label>
-                    <textarea
-                        value={resolutionComment}
-                        onChange={(e) => setResolutionComment(e.target.value)}
-                        placeholder="Опишите выполненное действие..."
-                        rows={4}
-                        disabled={selected.status === 'done' || actionLoading}
-                    />
-                </div>
+                {isDone && (
+                    <p><strong>Описание решения:</strong> {selected.resolutionComment || '—'}</p>
+                )}
 
-                {selected.status !== 'done' && (
-                    <div>
-                        {selected.status === 'new' && (
-                            <button
-                                type="button"
-                                onClick={handleTake}
-                                disabled={actionLoading}
-                            >
-                                В работу
-                            </button>
-                        )}
-                        {selected.status === 'in_progress' && (
-                            <button
-                                type="button"
-                                onClick={handleComplete}
-                                disabled={actionLoading || !resolutionComment.trim()}
-                            >
-                                Завершить
-                            </button>
-                        )}
+                {!isDone && (selected.status === 'assigned' || selected.status === 'new') && (
+                    <div style={{ marginTop: 16 }}>
+                        <button type="button" onClick={handleTake} disabled={actionLoading}>
+                            В работу
+                        </button>
                     </div>
                 )}
 
-                {selected.status === 'done' && (
-                    <p><strong>Решение:</strong> {selected.resolutionComment || '—'}</p>
+                {!isDone && selected.status === 'in_progress' && (
+                    <div style={{ marginTop: 16 }}>
+                        <div className="form-group">
+                            <label htmlFor="resolution">Описание решения:</label>
+                            <textarea
+                                id="resolution"
+                                value={resolutionComment}
+                                onChange={(e) => setResolutionComment(e.target.value)}
+                                placeholder="Опишите выполненное действие..."
+                                rows={4}
+                                disabled={actionLoading}
+                            />
+                        </div>
+                        <button
+                            type="button"
+                            onClick={handleComplete}
+                            disabled={actionLoading || !resolutionComment.trim()}
+                        >
+                            Выполнить
+                        </button>
+                    </div>
                 )}
 
                 {actionError && <p style={{ color: 'red' }}>{actionError}</p>}
@@ -144,7 +157,6 @@ export default function Tasks() {
         );
     }
 
-    // Список задач (Рис. 15)
     return (
         <div>
             <h2>Задачи</h2>
@@ -152,34 +164,38 @@ export default function Tasks() {
             {tasks.length === 0 ? (
                 <p>Нет назначенных задач</p>
             ) : (
-                <table border="1">
-                    <thead>
-                        <tr>
-                            <th>№</th>
-                            <th>Тип</th>
-                            <th>Сотрудник</th>
-                            <th>Новое значение</th>
-                            <th>Статус</th>
-                            <th>Дата</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {tasks.map(task => (
-                            <tr
-                                key={task.id}
-                                onClick={() => handleSelect(task)}
-                                style={{ cursor: 'pointer' }}
-                            >
-                                <td>{task.id}</td>
-                                <td>{task.requestTypeName}</td>
-                                <td>{task.employeeFio || task.employeeTabn || '—'}</td>
-                                <td>{task.newValue || '—'}</td>
-                                <td>{STATUS_LABELS[task.status] || task.status}</td>
-                                <td>{formatDate(task.createdAt)}</td>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th>№</th>
+                                <th>Тип</th>
+                                <th>Сотрудник</th>
+                                <th>Комментарии</th>
+                                <th>Статус</th>
+                                <th>Ответственный</th>
+                                <th>Дата</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {tasks.map(task => (
+                                <tr
+                                    key={task.id}
+                                    onClick={() => handleSelect(task)}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    <td>{task.id}</td>
+                                    <td>{task.requestTypeName}</td>
+                                    <td>{task.employeeFio || task.employeeTabn || '—'}</td>
+                                    <td>{getCommentText(task)}</td>
+                                    <td>{STATUS_LABELS[task.status] || task.status}</td>
+                                    <td>{task.managerFio || '—'}</td>
+                                    <td>{formatDate(task.createdAt)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             )}
         </div>
     );

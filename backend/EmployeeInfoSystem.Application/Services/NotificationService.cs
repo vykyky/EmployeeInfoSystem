@@ -13,74 +13,122 @@ namespace EmployeeInfoSystem.Application.Services
 {
     public class NotificationService : INotificationService
     {
-        private readonly IUnitOfWork _uow;  
+        private readonly IUnitOfWork _uow;
 
         public NotificationService(IUnitOfWork uow)
         {
             _uow = uow;
         }
 
+        public static string StatusLabel(string status) => status switch
+        {
+            "accepted" or "new" => "Принята",
+            "assigned" => "Назначена",
+            "in_progress" => "В работе",
+            "done" => "Выполнена",
+            _ => status
+        };
+
+        private static string ResponsibleName(Request request) =>
+            request.Manager?.EmployeeProfile?.Fio
+            ?? request.Manager?.Tabn
+            ?? "—";
+
+        private static string TypeName(Request request) =>
+            request.RequestType?.Name ?? request.RequestTypeId.ToString();
+
+        private async Task AddInboxAsync(int recipientId, int? senderId, string title, string body)
+        {
+            await _uow.Notifications.AddAsync(new Notification
+            {
+                RecipientId = recipientId,
+                SenderId = senderId,
+                Title = title,
+                Body = body,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow,
+                RequestId = null
+            });
+        }
+
+        private async Task NotifyEmployeeStatusAsync(Request request, bool includeResponsible)
+        {
+            var typeName = TypeName(request);
+            var statusLabel = StatusLabel(request.Status);
+            var body = includeResponsible
+                ? $"Электронный запрос «{typeName}» — статус: {statusLabel}. Ответственный: {ResponsibleName(request)}"
+                : $"Электронный запрос «{typeName}» — статус: {statusLabel}";
+
+            await AddInboxAsync(
+                request.EmployeeId,
+                request.ManagerId,
+                $"Электронный запрос: {statusLabel}",
+                body);
+        }
+
+        private async Task NotifyAdminsAsync(int? senderId, string title, string body)
+        {
+            var admins = await _uow.Users.GetByRolesAsync(new[] { "admin" });
+            foreach (var admin in admins)
+            {
+                await AddInboxAsync(admin.Id, senderId, title, body);
+            }
+        }
+
         // ── Внутренние методы (вызываются из RequestService) ─────────────────
 
         public async Task NotifyNewRequestAsync(Request request)
         {
-            // Если менеджер уже назначен — уведомляем его.
-            // Если нет — уведомляем всех менеджеров и админов (они увидят заявку в общем списке).
-            List<int> recipientIds;
+            // Сотруднику: Принята (тип + статус)
+            await NotifyEmployeeStatusAsync(request, includeResponsible: false);
 
-            if (request.ManagerId.HasValue)
+            // Админам: поступление нового электронного запроса
+            var typeName = TypeName(request);
+            var employee = request.Employee?.EmployeeProfile?.Fio
+                ?? request.Employee?.Tabn
+                ?? request.EmployeeId.ToString();
+
+            await NotifyAdminsAsync(
+                request.EmployeeId,
+                "Новый электронный запрос",
+                $"Поступил электронный запрос «{typeName}» от {employee}. Статус: {StatusLabel(request.Status)}");
+        }
+
+        public async Task NotifyRequestAssignedAsync(Request request)
+        {
+            // Сотруднику: Назначена (тип + статус + ответственный)
+            await NotifyEmployeeStatusAsync(request, includeResponsible: true);
+
+            // Менеджеру: назначен на задачу (админу при самоназначении не дублируем)
+            if (request.ManagerId.HasValue && request.Manager?.Role == "manager")
             {
-                recipientIds = new List<int> { request.ManagerId.Value };
+                var typeName = TypeName(request);
+                await AddInboxAsync(
+                    request.ManagerId.Value,
+                    null,
+                    "Вам назначена задача",
+                    $"Вам назначен электронный запрос «{typeName}» (задача #{request.Id}). Статус: {StatusLabel(request.Status)}");
             }
-            else
-            {
-                var managers = await _uow.Users.GetByRolesAsync(new[] { "manager", "admin" });
-                recipientIds = managers.Select(u => u.Id).ToList();
-            }
+        }
 
-            var notifications = recipientIds.Select(rid => new Notification
-            {
-                RecipientId = rid,
-                SenderId = request.EmployeeId,
-                Title = "Новый запрос",
-                Body = $"Поступил новый запрос. Тип: {request.RequestType?.Name ?? request.RequestTypeId.ToString()}",
-                IsRead = false,
-                CreatedAt = DateTime.UtcNow,
-                RequestId = request.Id
-            });
-
-            await _uow.Notifications.AddRangeAsync(notifications);
+        public async Task NotifyRequestInProgressAsync(Request request)
+        {
+            await NotifyEmployeeStatusAsync(request, includeResponsible: true);
         }
 
         public async Task NotifyRequestResolvedAsync(Request request)
         {
-            // Уведомляем сотрудника о том что запрос завершён
-            await _uow.Notifications.AddAsync(new Notification
-            {
-                RecipientId = request.EmployeeId,
-                SenderId = request.ManagerId,
-                Title = "Запрос выполнен",
-                Body = request.ResolutionComment ?? "Ваш запрос был выполнен.",
-                IsRead = false,
-                CreatedAt = DateTime.UtcNow,
-                RequestId = request.Id
-            });
-        }
+            await NotifyEmployeeStatusAsync(request, includeResponsible: true);
 
-        public async Task NotifyManagerAssignedAsync(Request request)
-        {
-            if (!request.ManagerId.HasValue) return;
-
-            await _uow.Notifications.AddAsync(new Notification
+            // Админам: выполнение системных запросов (для последующей синхронизации)
+            if (request.RequestType?.IsSystem == true)
             {
-                RecipientId = request.ManagerId.Value,
-                SenderId = null,   // системное
-                Title = "Вам назначен запрос",
-                Body = $"Запрос #{request.Id} назначен вам.",
-                IsRead = false,
-                CreatedAt = DateTime.UtcNow,
-                RequestId = request.Id
-            });
+                var typeName = TypeName(request);
+                await NotifyAdminsAsync(
+                    request.ManagerId,
+                    "Системный запрос выполнен",
+                    $"Системный электронный запрос «{typeName}» выполнен (задача #{request.Id}). Требуется синхронизация данных.");
+            }
         }
 
         // ── Самостоятельная рассылка (Рис. 5-7) ──────────────────────────────
@@ -113,7 +161,7 @@ namespace EmployeeInfoSystem.Application.Services
                 Body = dto.Body,
                 IsRead = false,
                 CreatedAt = DateTime.UtcNow,
-                RequestId = null   // не задача, просто уведомление
+                RequestId = null
             });
 
             await _uow.Notifications.AddRangeAsync(notifications);

@@ -21,6 +21,7 @@ import Tasks from "./pages/manager/Tasks"
 import NewsManager from "./pages/manager/NewsManager"
 import CreateNews from "./pages/manager/CreateNews"
 import EditNews from "./pages/manager/EditNews"
+import NotificationsManager from "./pages/manager/NotificationsManager"
 
 // ADMIN
 import AdminLayout from "./layouts/AdminLayout"
@@ -29,6 +30,7 @@ import PersonalInfoAdmin from "./pages/admin/PersonalInfoAdmin"
 import TasksAdmin from "./pages/admin/TasksAdmin"
 import RequestTypesAdmin from "./pages/admin/RequestTypesAdmin"
 import UsersAdmin from "./pages/admin/UsersAdmin"
+import NotificationsAdmin from "./pages/admin/NotificationsAdmin"
 
 export default function App() {
   return (
@@ -65,6 +67,7 @@ export default function App() {
         }>
           <Route path="" element={<Tasks />} />
           <Route path="tasks" element={<Tasks />} />
+          <Route path="notifications" element={<NotificationsManager />} />
           <Route path="news" element={<NewsManager />} />
           <Route path="news/create" element={<CreateNews />} />
           <Route path="news/edit/:id" element={<EditNews />} />
@@ -79,6 +82,7 @@ export default function App() {
           <Route path="" element={<WorkwearAdmin />} />
           <Route path="workwear" element={<WorkwearAdmin />} />
           <Route path="personal-info" element={<PersonalInfoAdmin />} />
+          <Route path="notifications" element={<NotificationsAdmin />} />
           <Route path="tasks" element={<TasksAdmin />} />
           <Route path="request-types" element={<RequestTypesAdmin />} />
           <Route path="users" element={<UsersAdmin />} />

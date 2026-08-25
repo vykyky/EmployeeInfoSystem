@@ -24,9 +24,10 @@ namespace EmployeeInfoSystem.Infrastructure.Persistence.Repositories
         public async Task<IEnumerable<RequestType>> GetAllAsync() =>
             await _db.RequestTypes.OrderBy(t => t.Name).ToListAsync();
 
+        // Активные несистемные типы — для выпадающего списка электронного запроса у пользователя
         public async Task<List<RequestType>> GetActiveAsync() =>
             await _db.RequestTypes
-                .Where(t => t.IsActive)
+                .Where(t => t.IsActive && !t.IsSystem)
                 .OrderBy(t => t.Name)
                 .ToListAsync();
 

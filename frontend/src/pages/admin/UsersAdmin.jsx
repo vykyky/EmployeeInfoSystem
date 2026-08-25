@@ -135,7 +135,7 @@ export default function UsersAdmin() {
     return (
         <div className="page">
             <div className="page-header">
-                <h1>Пользователи</h1>
+              
                 <button
                     className="btn btn-primary"
                     onClick={() => setShowForm(true)}
@@ -200,13 +200,7 @@ export default function UsersAdmin() {
                         {formError && <p className="users-field-error">{formError}</p>}
 
                         <div className="users-form-actions">
-                            <button
-                                type="submit"
-                                className="btn btn-primary"
-                                disabled={formLoading}
-                            >
-                                {formLoading ? "Сохранение..." : "Зарегистрировать"}
-                            </button>
+                            
                             <button
                                 type="button"
                                 className="btn btn-secondary"
@@ -214,6 +208,13 @@ export default function UsersAdmin() {
                                 disabled={formLoading}
                             >
                                 Отмена
+                            </button>
+                            <button
+                                type="submit"
+                                className="btn btn-primary"
+                                disabled={formLoading}
+                            >
+                                {formLoading ? "Сохранение..." : "Зарегистрировать"}
                             </button>
                         </div>
                     </form>

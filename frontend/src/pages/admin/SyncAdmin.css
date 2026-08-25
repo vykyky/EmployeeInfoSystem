@@ -1,0 +1,29 @@
+.sync-card {
+    background: rgb(242, 242, 242);
+    border-radius: 12px;
+    max-width: 440px;
+}
+
+.sync-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.sync-actions .btn {
+    font-size: 16px;
+    padding: 8px 16px;
+}
+
+.sync-status {
+    margin-top: 12px;
+    font-size: 14px;
+}
+
+.sync-status-ok {
+    color: rgb(84, 107, 142);
+}
+
+.sync-status-error {
+    color: rgb(227, 6, 19);
+}

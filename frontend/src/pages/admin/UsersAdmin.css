@@ -68,8 +68,7 @@
 /* обёртка таблицы пользователей */
 .users-table-wrap {
     background: rgb(242, 242, 242);
-    padding: 16px;
-    border-radius: 12px;
+
     overflow-x: auto;
 }
 

@@ -34,6 +34,21 @@ export async function getAllRequests() {
     return await response.json();
 }
 
+export async function createRequest({ requestTypeId, comment }) {
+    const response = await fetch(`${API_URL}/api/requests`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ requestTypeId, comment })
+    });
+
+    if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.error || "Не удалось создать электронный запрос");
+    }
+
+    return response;
+}
+
 export async function takeRequest(id) {
     const response = await fetch(`${API_URL}/api/requests/${id}/take`, {
         method: "PATCH",

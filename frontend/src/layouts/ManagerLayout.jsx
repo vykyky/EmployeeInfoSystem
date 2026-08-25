@@ -28,6 +28,12 @@ export default function ManagerLayout({ children }) {
             </li>
 
             <li>
+              <NavLink to="/manager/notifications">
+                Уведомления
+              </NavLink>
+            </li>
+
+            <li>
               <NavLink to="/manager/tasks">
                 Задачи
               </NavLink>

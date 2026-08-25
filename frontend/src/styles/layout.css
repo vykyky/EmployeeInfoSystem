@@ -103,7 +103,7 @@
     background-color: rgb(255, 255, 255);
 }
 
-.page { padding: 24px 32px; }
+.page { padding: 16px 32px; }
 
 .page-header {
     display: flex;

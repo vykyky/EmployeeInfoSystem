@@ -15,6 +15,11 @@
     padding: 10px;
 }
 
+.table td:first-child,
+.table th:first-child {
+    text-align: left;
+}
+
 .table th,
 .table td {
     border: 1px solid #ddd;

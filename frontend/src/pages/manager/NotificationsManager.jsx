@@ -1,5 +1,5 @@
 import NotificationsInbox from '../../components/NotificationsInbox';
 
-export default function Notifications() {
+export default function NotificationsManager() {
   return <NotificationsInbox />;
 }

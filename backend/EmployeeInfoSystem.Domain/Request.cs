@@ -13,7 +13,7 @@ namespace EmployeeInfoSystem.Domain
         public int RequestTypeId { get; set; }         // тип запроса
         public string? Comment { get; set; }           // комментарий
         public string? NewValue { get; set; }          // новое значение (для смены размера и т.п.)
-        public string Status { get; set; }             // "new", "in_progress", "done"
+        public string Status { get; set; }             // "accepted", "assigned", "in_progress", "done"
         public int? ManagerId { get; set; }            // кто назначен менеджером
         public string? ResolutionComment { get; set; } // ответ/решение менеджера
         public DateTime CreatedAt { get; set; }

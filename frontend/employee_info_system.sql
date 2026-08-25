@@ -119,8 +119,8 @@ CREATE TABLE Requests (
     request_type_id     INTEGER NOT NULL REFERENCES RequestTypes(id),
     comment             TEXT,                       -- Комментарий сотрудника
     new_value           VARCHAR(500),               -- Новое значение (для запросов на изменение данных)
-    status              VARCHAR(20) NOT NULL DEFAULT 'new'
-                            CHECK (status IN ('new', 'in_progress', 'done')),
+    status              VARCHAR(20) NOT NULL DEFAULT 'accepted'
+                            CHECK (status IN ('accepted', 'assigned', 'in_progress', 'done')),
     manager_id          INTEGER REFERENCES Users(id), -- Назначенный менеджер
     resolution_comment  TEXT,                       -- Описание решения от менеджера
     created_at          TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -129,7 +129,7 @@ CREATE TABLE Requests (
 
 COMMENT ON TABLE Requests IS 'Электронные запросы сотрудников — задачи для менеджера';
 COMMENT ON COLUMN Requests.new_value IS 'Новое значение при запросах на изменение (размер одежды, телефон и т.д.)';
-COMMENT ON COLUMN Requests.status IS 'new — новая, in_progress — в работе, done — выполнена';
+COMMENT ON COLUMN Requests.status IS 'accepted — принята, assigned — назначена, in_progress — в работе, done — выполнена';
 COMMENT ON COLUMN Requests.manager_id IS 'Менеджер, которому назначена задача (назначает администратор)';
 
 -- ============================================================

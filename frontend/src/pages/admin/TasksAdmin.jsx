@@ -3,10 +3,24 @@ import { getAllRequests, assignManager, takeRequest, completeRequest } from '../
 import { getAllUsers } from '../../api/usersApi';
 
 const STATUS_LABELS = {
-    new: 'Новая',
+    accepted: 'Принята',
+    new: 'Принята',
+    assigned: 'Назначена',
     in_progress: 'В работе',
     done: 'Выполнена'
 };
+
+function getCommentText(task) {
+    // У системных запросов новое значение показываем в комментарии
+    return task.newValue || task.comment || '—';
+}
+
+function getResponsibleLabel(task, managers = []) {
+    if (task.managerFio) return task.managerFio;
+    const m = managers.find(x => x.id === task.managerId);
+    if (m) return m.fio || m.tabn || '—';
+    return '—';
+}
 
 export default function AdminTasks() {
     const [tasks, setTasks] = useState([]);
@@ -20,13 +34,11 @@ export default function AdminTasks() {
     const [actionLoading, setActionLoading] = useState(false);
     const [actionError, setActionError] = useState(null);
 
-    // Читаем ID текущего админа прямо из localStorage
-    const currentUserId = localStorage.getItem("userId") 
-        ? parseInt(localStorage.getItem("userId"), 10) 
+    const currentUserId = localStorage.getItem('userId')
+        ? parseInt(localStorage.getItem('userId'), 10)
         : null;
 
     useEffect(() => {
-        // Загружаем одновременно задачи и список всех пользователей для назначения
         Promise.all([getAllRequests(), getAllUsers()])
             .then(([taskData, userData]) => {
                 setTasks(taskData);
@@ -39,8 +51,18 @@ export default function AdminTasks() {
             });
     }, []);
 
-    function loadTasks() {
-        getAllRequests().then(setTasks).catch(() => {});
+    async function refreshTasks(keepSelectedId) {
+        const data = await getAllRequests();
+        setTasks(data);
+        if (keepSelectedId != null) {
+            const refreshed = data.find(t => t.id === keepSelectedId);
+            if (refreshed) {
+                setSelected(refreshed);
+                setSelectedManagerId(refreshed.managerId?.toString() || '');
+                setResolutionComment(refreshed.resolutionComment || '');
+            }
+        }
+        return data;
     }
 
     function handleSelect(task) {
@@ -55,15 +77,13 @@ export default function AdminTasks() {
         setActionError(null);
     }
 
-    // Назначение / Переназначение менеджера
     async function handleAssign() {
         if (!selectedManagerId) return;
         setActionLoading(true);
         setActionError(null);
         try {
             await assignManager(selected.id, parseInt(selectedManagerId, 10));
-            loadTasks();
-            handleClose();
+            await refreshTasks(selected.id);
         } catch (err) {
             setActionError(err.message);
         } finally {
@@ -71,14 +91,12 @@ export default function AdminTasks() {
         }
     }
 
-    // Взятие задачи в работу
     async function handleTake() {
         setActionLoading(true);
         setActionError(null);
         try {
             await takeRequest(selected.id);
-            loadTasks();
-            handleClose();
+            await refreshTasks(selected.id);
         } catch (err) {
             setActionError(err.message);
         } finally {
@@ -86,7 +104,6 @@ export default function AdminTasks() {
         }
     }
 
-    // Завершение задачи с фиксацией решения
     async function handleComplete() {
         if (!resolutionComment.trim()) {
             setActionError('Укажите описание решения');
@@ -96,8 +113,7 @@ export default function AdminTasks() {
         setActionError(null);
         try {
             await completeRequest(selected.id, resolutionComment);
-            loadTasks();
-            handleClose();
+            await refreshTasks(selected.id);
         } catch (err) {
             setActionError(err.message);
         } finally {
@@ -105,14 +121,14 @@ export default function AdminTasks() {
         }
     }
 
-    const formatDate = (d) => d ? new Date(d).toLocaleDateString('ru-RU') : '—';
+    const formatDate = (d) => (d ? new Date(d).toLocaleDateString('ru-RU') : '—');
 
     if (loading) return <div>Загрузка...</div>;
     if (error) return <div>Ошибка: {error}</div>;
 
     if (selected) {
-        // Сверяем назначена ли задача на вошедшего админа
         const isAssignedToMe = currentUserId && selected.managerId === currentUserId;
+        const isDone = selected.status === 'done';
 
         return (
             <div>
@@ -122,26 +138,27 @@ export default function AdminTasks() {
 
                 <p><strong>Тип:</strong> {selected.requestTypeName}</p>
                 <p><strong>Сотрудник:</strong> {selected.employeeFio || selected.employeeTabn || '—'}</p>
-                <p><strong>Комментарий:</strong> {selected.comment || '—'}</p>
-                <p><strong>Новое значение:</strong> {selected.newValue || '—'}</p>
+                <p><strong>Комментарий:</strong> {getCommentText(selected)}</p>
                 <p><strong>Статус:</strong> {STATUS_LABELS[selected.status] || selected.status}</p>
-                <p><strong>Ответственный менеджер:</strong> {selected.managerFio || '—'}</p>
-                <p><strong>Дата создания:</strong> {formatDate(selected.createdAt)}</p>
 
-                {/* 1. АДМИНИСТРАТИВНЫЙ БЛОК: Назначить / переназначить менеджера */}
-                {selected.status !== 'done' && (
-                    <div style={{ margin: '15px 0', padding: '10px', border: '1px solid #ccc' }}>
-                        <h3>Управление ответственным</h3>
-                        <label>Назначить менеджера: </label>
+                {!isDone ? (
+                    <p>
+                        <strong>Ответственный:</strong>{' '}
                         <select
                             value={selectedManagerId}
                             onChange={(e) => setSelectedManagerId(e.target.value)}
                             disabled={actionLoading}
+                            style={{
+                                fontSize: 14,
+                                padding: '2px 6px',
+                                maxWidth: 260,
+                                verticalAlign: 'middle'
+                            }}
                         >
                             <option value="">— выбрать —</option>
                             {managers.map(m => (
                                 <option key={m.id} value={m.id}>
-                                    {m.fio || m.tabn} {m.id === currentUserId ? '(Вы)' : ''}
+                                    {m.fio || m.tabn}{m.id === currentUserId ? ' (Вы)' : ''}
                                 </option>
                             ))}
                         </select>
@@ -149,64 +166,53 @@ export default function AdminTasks() {
                             type="button"
                             onClick={handleAssign}
                             disabled={actionLoading || !selectedManagerId}
-                            style={{ marginLeft: '10px' }}
+                            style={{ marginLeft: 8, fontSize: 14, padding: '2px 10px' }}
                         >
                             Назначить
+                        </button>
+                    </p>
+                ) : (
+                    <p><strong>Ответственный:</strong> {getResponsibleLabel(selected, managers)}</p>
+                )}
+
+                <p><strong>Дата создания:</strong> {formatDate(selected.createdAt)}</p>
+
+                {isDone && (
+                    <p><strong>Описание решения:</strong> {selected.resolutionComment || '—'}</p>
+                )}
+
+                {isAssignedToMe && !isDone && (selected.status === 'assigned' || selected.status === 'new') && (
+                    <div style={{ marginTop: 16 }}>
+                        <button type="button" onClick={handleTake} disabled={actionLoading}>
+                            В работу
                         </button>
                     </div>
                 )}
 
-                {/* 2. ИСПОЛНИТЕЛЬСКИЙ БЛОК: Виден только если задача назначена на текущего админа */}
-                {isAssignedToMe && selected.status !== 'done' && (
-                    <div style={{ margin: '15px 0', padding: '10px', border: '1px solid #4CAF50' }}>
-                        <h3>Работа над задачей</h3>
-                        
-                        {/* Статус: НОВЫЙ — показываем только кнопку "В работу" */}
-                        {selected.status === 'new' && (
-                            <button
-                                type="button"
-                                onClick={handleTake}
+                {isAssignedToMe && !isDone && selected.status === 'in_progress' && (
+                    <div style={{ marginTop: 16 }}>
+                        <div className="form-group">
+                            <label htmlFor="resolution">Описание решения:</label>
+                            <textarea
+                                id="resolution"
+                                value={resolutionComment}
+                                onChange={(e) => setResolutionComment(e.target.value)}
+                                placeholder="Опишите выполненное действие..."
+                                rows={4}
                                 disabled={actionLoading}
-                            >
-                                В работу
-                            </button>
-                        )}
-
-                        {/* Статус: В РАБОТЕ — показываем textarea и кнопку "Завершить" */}
-                        {selected.status === 'in_progress' && (
-                            <div>
-                                <div>
-                                    <label>Описание решения</label>
-                                    <br />
-                                    <textarea
-                                        value={resolutionComment}
-                                        onChange={(e) => setResolutionComment(e.target.value)}
-                                        placeholder="Опишите выполненное действие..."
-                                        rows={4}
-                                        disabled={actionLoading}
-                                    />
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={handleComplete}
-                                    disabled={actionLoading || !resolutionComment.trim()}
-                                    style={{ marginTop: '10px' }}
-                                >
-                                    Завершить
-                                </button>
-                            </div>
-                        )}
+                            />
+                        </div>
+                        <button
+                            type="button"
+                            onClick={handleComplete}
+                            disabled={actionLoading || !resolutionComment.trim()}
+                        >
+                            Выполнить
+                        </button>
                     </div>
                 )}
 
-                {/* 3. Если задача ЗАВЕРШЕНА — вывод итогового решения */}
-                {selected.status === 'done' && (
-                    <div style={{ marginTop: '15px' }}>
-                        <p><strong>Описание решения:</strong> {selected.resolutionComment || '—'}</p>
-                    </div>
-                )}
-
-                {actionError && <p style={{ color: 'red', marginTop: '10px' }}>{actionError}</p>}
+                {actionError && <p style={{ color: 'red', marginTop: 10 }}>{actionError}</p>}
             </div>
         );
     }
@@ -218,36 +224,38 @@ export default function AdminTasks() {
             {tasks.length === 0 ? (
                 <p>Нет задач</p>
             ) : (
-                <table border="1">
-                    <thead>
-                        <tr>
-                            <th>№</th>
-                            <th>Тип</th>
-                            <th>Сотрудник</th>
-                            <th>Новое значение</th>
-                            <th>Статус</th>
-                            <th>Менеджер</th>
-                            <th>Дата</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {tasks.map(task => (
-                            <tr
-                                key={task.id}
-                                onClick={() => handleSelect(task)}
-                                style={{ cursor: 'pointer' }}
-                            >
-                                <td>{task.id}</td>
-                                <td>{task.requestTypeName}</td>
-                                <td>{task.employeeFio || task.employeeTabn || '—'}</td>
-                                <td>{task.newValue || '—'}</td>
-                                <td>{STATUS_LABELS[task.status] || task.status}</td>
-                                <td>{task.managerFio || '—'}</td>
-                                <td>{formatDate(task.createdAt)}</td>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th>№</th>
+                                <th>Тип</th>
+                                <th>Сотрудник</th>
+                                <th>Комментарии</th>
+                                <th>Статус</th>
+                                <th>Ответственный</th>
+                                <th>Дата</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {tasks.map(task => (
+                                <tr
+                                    key={task.id}
+                                    onClick={() => handleSelect(task)}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    <td>{task.id}</td>
+                                    <td>{task.requestTypeName}</td>
+                                    <td>{task.employeeFio || task.employeeTabn || '—'}</td>
+                                    <td>{getCommentText(task)}</td>
+                                    <td>{STATUS_LABELS[task.status] || task.status}</td>
+                                    <td>{getResponsibleLabel(task, managers)}</td>
+                                    <td>{formatDate(task.createdAt)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             )}
         </div>
     );

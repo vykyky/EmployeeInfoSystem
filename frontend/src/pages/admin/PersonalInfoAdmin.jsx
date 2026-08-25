@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { syncProfileByTabn, syncAllProfiles } from '../../api/syncApi';
+import './SyncAdmin.css';
 
 export default function PersonalInfoAdmin() {
   const [tabn, setTabn]       = useState('');
@@ -20,38 +21,44 @@ export default function PersonalInfoAdmin() {
   }
 
   return (
-    <div>
-      <h2>Личная информация</h2>
+    <div className="page">
 
-      <input
-        placeholder="Лицевой счет"
-        value={tabn}
-        onChange={(e) => setTabn(e.target.value)}
-        disabled={loading}
-      />
+      <div className="sync-card">
+        <div className="form-group">
+          <label>Номер лицевого счета для синхронизации личных данных</label>
+          <input
+            placeholder="Лицевой счет"
+            value={tabn}
+            onChange={(e) => setTabn(e.target.value)}
+            disabled={loading}
+          />
+        </div>
 
-      <br /><br />
+        <div className="sync-actions">
+          <button
+            className="btn btn-primary"
+            onClick={() => handleSync(() => syncProfileByTabn(tabn))}
+            disabled={loading || !tabn.trim()}
+          >
+            Обновить сотрудника
+          </button>
 
-      <button
-        onClick={() => handleSync(() => syncProfileByTabn(tabn))}
-        disabled={loading || !tabn.trim()}
-      >
-        Обновить сотрудника
-      </button>
+          <button
+            className="btn btn-secondary"
+            onClick={() => handleSync(syncAllProfiles)}
+            disabled={loading}
+          >
+            Обновить всех сотрудников
+          </button>
+        </div>
 
-      <button
-        onClick={() => handleSync(syncAllProfiles)}
-        disabled={loading}
-      >
-        Обновить всех сотрудников
-      </button>
-
-      {loading && <p>Выполняется синхронизация...</p>}
-      {status && (
-        <p style={{ color: status.ok ? 'green' : 'red' }}>
-          {status.message}
-        </p>
-      )}
+        {loading && <p className="sync-status">Выполняется синхронизация...</p>}
+        {status && (
+          <p className={`sync-status ${status.ok ? 'sync-status-ok' : 'sync-status-error'}`}>
+            {status.message}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

@@ -21,6 +21,19 @@ export async function getAllRequestTypes() {
     return await response.json();
 }
 
+export async function getActiveRequestTypes() {
+    const response = await fetch(`${API_URL}/api/requesttypes/active`, {
+        headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.error || "Не удалось получить активные типы запросов");
+    }
+
+    return await response.json();
+}
+
 export async function createRequestType(data) {
     const response = await fetch(`${API_URL}/api/requesttypes`, {
         method: "POST",

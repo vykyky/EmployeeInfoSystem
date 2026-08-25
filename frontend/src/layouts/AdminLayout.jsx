@@ -34,6 +34,12 @@ export default function AdminLayout({ children }) {
             </li>
 
             <li>
+              <NavLink to="/admin/notifications">
+                Уведомления
+              </NavLink>
+            </li>
+
+            <li>
               <NavLink to="/admin/tasks">
                 Задачи
               </NavLink>
