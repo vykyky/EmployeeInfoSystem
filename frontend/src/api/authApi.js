@@ -15,16 +15,20 @@ export async function login(tabn, password) {
     return await response.json(); // { token, role, fio }
 }
 
-export function saveAuth(token, role, fio) {
+export function saveAuth(token, role, fio, id) {
     localStorage.setItem("token", token);
     localStorage.setItem("role", role);
     localStorage.setItem("fio", fio);
+    if (id) {
+        localStorage.setItem("userId", id);
+    }
 }
 
 export function clearAuth() {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     localStorage.removeItem("fio");
+    localStorage.removeItem("userId");
 }
 
 export function getRole() {

@@ -56,6 +56,9 @@ namespace EmployeeInfoSystem.Infrastructure.Persistence.Repositories
             if (entity is not null)
                 _db.Requests.Remove(entity);
         }
+
+        public async Task<bool> ExistsByRequestTypeIdAsync(int requestTypeId) =>
+            await _db.Requests.AnyAsync(r => r.RequestTypeId == requestTypeId);
     }
 
 }

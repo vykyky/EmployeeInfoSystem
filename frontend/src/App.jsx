@@ -18,7 +18,6 @@ import Workwear from "./pages/user/Workwear"
 // MANAGER
 import ManagerLayout from "./layouts/ManagerLayout"
 import Tasks from "./pages/manager/Tasks"
-import TaskDetails from "./pages/manager/TaskDetails"
 import NewsManager from "./pages/manager/NewsManager"
 import CreateNews from "./pages/manager/CreateNews"
 import EditNews from "./pages/manager/EditNews"
@@ -28,7 +27,6 @@ import AdminLayout from "./layouts/AdminLayout"
 import WorkwearAdmin from "./pages/admin/WorkwearAdmin"
 import PersonalInfoAdmin from "./pages/admin/PersonalInfoAdmin"
 import TasksAdmin from "./pages/admin/TasksAdmin"
-import TaskDetailsAdmin from "./pages/admin/TaskDetailsAdmin"
 import RequestTypesAdmin from "./pages/admin/RequestTypesAdmin"
 import UsersAdmin from "./pages/admin/UsersAdmin"
 
@@ -67,7 +65,6 @@ export default function App() {
         }>
           <Route path="" element={<Tasks />} />
           <Route path="tasks" element={<Tasks />} />
-          <Route path="tasks/:id" element={<TaskDetails />} />
           <Route path="news" element={<NewsManager />} />
           <Route path="news/create" element={<CreateNews />} />
           <Route path="news/edit/:id" element={<EditNews />} />
@@ -83,7 +80,6 @@ export default function App() {
           <Route path="workwear" element={<WorkwearAdmin />} />
           <Route path="personal-info" element={<PersonalInfoAdmin />} />
           <Route path="tasks" element={<TasksAdmin />} />
-          <Route path="tasks/:id" element={<TaskDetailsAdmin />} />
           <Route path="request-types" element={<RequestTypesAdmin />} />
           <Route path="users" element={<UsersAdmin />} />
         </Route>

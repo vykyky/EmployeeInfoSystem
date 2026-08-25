@@ -38,25 +38,6 @@ namespace EmployeeInfoSystem.API.Controllers
             return FromResult(Result.Success());
         }
 
-        // POST api/sync/ppe?tabn=12345  — один сотрудник
-        // POST api/sync/ppe             — все сотрудники
-        [HttpPost("ppe")]
-        public async Task<IActionResult> SyncPpe([FromQuery] string? tabn)
-        {
-            if (!string.IsNullOrEmpty(tabn))
-            {
-                if (!await _syncService.TabnExistsAsync(tabn))
-                    return FromResult(Result.Failure(Error.NotFound($"Лицевой счет {tabn} не найден в Галактике")));
-
-                await _syncService.SyncPpeByTabnAsync(tabn);
-            }
-            else
-            {
-                await _syncService.SyncAllPpeAsync();
-            }
-
-            return FromResult(Result.Success());
-        }
-
+    
     }
 }

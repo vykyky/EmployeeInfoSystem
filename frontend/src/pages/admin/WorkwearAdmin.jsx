@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { syncPpeByTabn, syncAllPpe } from '../../api/syncApi';
+import { syncProfileByTabn, syncAllProfiles } from '../../api/syncApi';
 
 export default function WorkwearAdmin() {
   const [tabn, setTabn]       = useState('');
@@ -33,14 +33,14 @@ export default function WorkwearAdmin() {
       <br /><br />
 
       <button
-        onClick={() => handleSync(() => syncPpeByTabn(tabn))}
+        onClick={() => handleSync(() => syncProfileByTabn(tabn))}
         disabled={loading || !tabn.trim()}
       >
         Обновить сотрудника
       </button>
 
       <button
-        onClick={() => handleSync(syncAllPpe)}
+        onClick={() => handleSync(syncAllProfiles)}
         disabled={loading}
       >
         Обновить всех сотрудников

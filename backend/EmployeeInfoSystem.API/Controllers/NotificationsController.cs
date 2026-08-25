@@ -2,6 +2,7 @@
 using EmployeeInfoSystem.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -35,7 +36,7 @@ namespace EmployeeInfoSystem.API.Controllers
         [Authorize(Roles = "manager,admin")]
         public async Task<IActionResult> GetTasks()
         {
-            var role = User.FindFirst("role")?.Value;
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
             var userId = GetUserId();
             if (userId is null) return Unauthorized();
 

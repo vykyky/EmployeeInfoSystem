@@ -74,6 +74,13 @@ namespace EmployeeInfoSystem.Application.Services
             if (entity is null)
                 return Error.NotFound($"Тип запроса {id} не найден");
 
+            if (entity.IsSystem)
+                return Error.Validation("Системные типы запросов нельзя удалять");
+
+            var hasRequests = await _uow.Requests.ExistsByRequestTypeIdAsync(id);
+            if (hasRequests)
+                return Error.Conflict("Нельзя удалить тип запроса — к нему привязаны существующие запросы. Вместо удаления деактивируйте его через «Изменить».");
+
             await _uow.RequestTypes.DeleteAsync(id);
             await _uow.SaveChangesAsync();
 

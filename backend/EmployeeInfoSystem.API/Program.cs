@@ -93,7 +93,6 @@ using (var scope = app.Services.CreateScope())
         {
             new RequestType
             {
-                Id = 1,
                 Name = "Изменение контактных данных",
                 IsActive = true,
                 IsSystem = true,
@@ -101,7 +100,6 @@ using (var scope = app.Services.CreateScope())
             },
             new RequestType
             {
-                Id = 2,
                 Name = "Изменение размеров спецодежды",
                 IsActive = true,
                 IsSystem = true,

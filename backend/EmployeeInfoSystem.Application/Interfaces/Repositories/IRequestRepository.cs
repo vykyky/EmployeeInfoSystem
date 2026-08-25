@@ -11,5 +11,7 @@ namespace EmployeeInfoSystem.Application.Interfaces.Repositories
     {
         Task<List<Request>> GetByEmployeeIdAsync(int employeeId);
         Task<List<Request>> GetByManagerIdAsync(int managerId);
+
+        Task<bool> ExistsByRequestTypeIdAsync(int requestTypeId);
     }
 }

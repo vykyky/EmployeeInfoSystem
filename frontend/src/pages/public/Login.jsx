@@ -26,7 +26,7 @@ export default function Login() {
     setLoading(true)
     try {
       const data = await login(tabn.trim(), password)
-      saveAuth(data.token, data.role, data.fio)
+      saveAuth(data.token, data.role, data.fio, data.id)
 
       if (data.role === "admin") navigate("/admin")
       else if (data.role === "manager") navigate("/manager")

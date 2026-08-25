@@ -16,5 +16,8 @@ namespace EmployeeInfoSystem.Application.Interfaces.Services
         Task<Result<int>> CreateAsync(CreateRequestTypeDto dto);
         Task<Result> UpdateAsync(int id, UpdateRequestTypeDto dto);
         Task<Result> DeleteAsync(int id);
+
+
+        
     }
 }

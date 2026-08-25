@@ -36,6 +36,7 @@ namespace EmployeeInfoSystem.Application.Services
 
             return new AuthResultDto
             {
+                Id = user.Id,
                 Token = _tokenService.GenerateToken(user),
                 Role = user.Role,
                 Fio = user.EmployeeProfile?.Fio ?? user.Tabn
