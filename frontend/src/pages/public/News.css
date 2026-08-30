@@ -115,3 +115,14 @@
 .news-main:not(:has(.news-title)) {
     margin: 0px;
 }
+
+@media (max-width: 640px) {
+  .news-main {
+    margin: 0 12px 12px 12px;
+  }
+
+  .news-title {
+    font-size: 26px;
+    margin-bottom: 16px;
+  }
+}

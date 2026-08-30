@@ -27,3 +27,92 @@
 .form-group textarea:focus {
     border-color: rgb(84, 107, 142);
 }
+
+
+/* Затемняющий фон на весь экран */
+/* Оверлей теперь позиционируется относительно .content */
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50; /* Достаточно, чтобы перекрыть таблицу, но не выходить за границы content */
+    padding: 16px;
+    animation: fadeIn 0.2s ease-out;
+}
+
+/* Карточка модалки */
+.modal-card {
+    background: #ffffff;
+    padding: 28px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    animation: scaleUp 0.2s ease-out;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 500;
+    margin: 0;
+    color: rgb(33, 37, 41);
+}
+
+/* Кнопка-крестик в углу */
+.modal-close-btn {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: rgb(150, 150, 150);
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: color 0.15s ease;
+}
+
+.modal-close-btn:hover {
+    color: rgb(33, 37, 41);
+}
+
+/* Анимации появления */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@media (max-width: 640px) {
+  .modal-card {
+    padding: 20px 16px;
+    max-width: 100%;
+    margin: 0 8px;
+  }
+}

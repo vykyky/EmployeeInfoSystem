@@ -1,77 +1,64 @@
-import { useNavigate, NavLink, Outlet } from "react-router-dom"
-import Header from "../components/Header"
-import Footer from "../components/Footer"
+import { useState } from "react";
+import { useNavigate, NavLink, Outlet } from "react-router-dom";
+import Header from "../components/Header";
 import { clearAuth } from "../api/authApi";
+import NotificationsBadge from "../components/NotificationsBadge";
 
-export default function AdminLayout({ children }) {
-  const navigate = useNavigate()
+export default function AdminLayout() {
+  const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   function handleLogout() {
-    clearAuth()
-    navigate("/")
+    clearAuth();
+    navigate("/");
   }
+
+  function closeSidebar() {
+    setSidebarOpen(false);
+  }
+
   return (
     <div>
-      <Header />
-
+      <Header onBurgerClick={() => setSidebarOpen(prev => !prev)} />
       <div className="layout">
 
-        <aside className="sidebar">
-         
+        {sidebarOpen && (
+          <div className="sidebar-overlay" onClick={closeSidebar} />
+        )}
 
+        <aside className={`sidebar ${sidebarOpen ? "sidebar--open" : ""}`}>
           <ul className="sidebar-menu">
-
             <li>
-              <NavLink to="/admin/workwear">
-                Спец. одежда
-              </NavLink>
-            </li>
-
-            <li>
-              <NavLink to="/admin/personal-info">
-                Личная информация
-              </NavLink>
-            </li>
-
-            <li>
-              <NavLink to="/admin/notifications">
+              <NavLink to="/admin/notifications" onClick={closeSidebar}>
                 Уведомления
-              </NavLink>
-            </li>
-
-            <li>
-              <NavLink to="/admin/tasks">
-                Задачи
-              </NavLink>
-            </li>
-
-            
-
-            <li>
-              <NavLink to="/admin/request-types">
-                Электронный запрос
+                <NotificationsBadge />
               </NavLink>
             </li>
             <li>
-             <NavLink to="/admin/users">
-                Пользователи
-              </NavLink>
-            </li>             
-
+              <NavLink to="/admin/workwear" onClick={closeSidebar}>Спец. одежда</NavLink>
+            </li>
+            <li>
+              <NavLink to="/admin/personal-info" onClick={closeSidebar}>Личная информация</NavLink>
+            </li>
+            <li>
+              <NavLink to="/admin/tasks" onClick={closeSidebar}>Задачи</NavLink>
+            </li>
+            <li>
+              <NavLink to="/admin/request-types" onClick={closeSidebar}>Электронный запрос</NavLink>
+            </li>
+            <li>
+              <NavLink to="/admin/users" onClick={closeSidebar}>Пользователи</NavLink>
+            </li>
             <li className="logout-item">
               <button onClick={handleLogout}>Выход</button>
             </li>
-
           </ul>
         </aside>
 
         <main className="content">
           <Outlet />
         </main>
-
-
       </div>
-
     </div>
-  )
+  );
 }

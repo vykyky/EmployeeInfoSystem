@@ -20,5 +20,7 @@ namespace EmployeeInfoSystem.Domain
         public DateTime? LastLoginAt { get; set; }
 
         public EmployeeProfile? EmployeeProfile { get; set; }
+
+        public ICollection<PushSubscriptionEntity> PushSubscriptions { get; set; } = new List<PushSubscriptionEntity>();
     }
 }

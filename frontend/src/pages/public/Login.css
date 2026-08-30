@@ -112,3 +112,31 @@
     padding: 2px 8px;
     cursor: pointer;
 }
+
+@media (max-width: 640px) {
+  .login-container {
+    width: calc(100% - 24px);
+    box-sizing: border-box;
+    margin: 0 12px;
+  }
+
+  .login-container .form-group {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .login-container .form-group label {
+    width: auto;
+    margin-bottom: 4px;
+  }
+
+  .login-container .form-group input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Вот это добавить — враппер поля пароля тоже должен быть на всю ширину */
+  .login-container .input-wrapper {
+    width: 100%;
+  }
+}

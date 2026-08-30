@@ -114,6 +114,7 @@ using (var scope = app.Services.CreateScope())
 
 app.UseCors("ReactPolicy");
 
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 

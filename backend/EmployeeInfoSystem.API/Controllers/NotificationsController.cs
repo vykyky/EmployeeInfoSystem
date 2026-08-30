@@ -69,6 +69,16 @@ namespace EmployeeInfoSystem.API.Controllers
             return FromResult(result);
         }
 
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var userId = GetUserId();
+            if (userId is null) return Unauthorized();
+
+            var result = await _notificationService.DeleteAsync(id, userId.Value);
+            return FromResult(result);
+        }
+
         private int? GetUserId()
         {
             var raw = User.FindFirst("userId")?.Value;

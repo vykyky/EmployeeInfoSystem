@@ -19,8 +19,6 @@ import Workwear from "./pages/user/Workwear"
 import ManagerLayout from "./layouts/ManagerLayout"
 import Tasks from "./pages/manager/Tasks"
 import NewsManager from "./pages/manager/NewsManager"
-import CreateNews from "./pages/manager/CreateNews"
-import EditNews from "./pages/manager/EditNews"
 import NotificationsManager from "./pages/manager/NotificationsManager"
 
 // ADMIN
@@ -49,7 +47,7 @@ export default function App() {
           </ProtectedRoute>
         }>
           
-          <Route path="" element={<Profile />} /> 
+          <Route path="" element={<Notifications />} /> 
           <Route path="profile" element={<Profile />} />
           <Route path="settings" element={<Settings />} />
           <Route path="notifications" element={<Notifications />} />
@@ -69,8 +67,6 @@ export default function App() {
           <Route path="tasks" element={<Tasks />} />
           <Route path="notifications" element={<NotificationsManager />} />
           <Route path="news" element={<NewsManager />} />
-          <Route path="news/create" element={<CreateNews />} />
-          <Route path="news/edit/:id" element={<EditNews />} />
         </Route>
 
 
@@ -79,7 +75,7 @@ export default function App() {
             <AdminLayout />
           </ProtectedRoute>
         }>
-          <Route path="" element={<WorkwearAdmin />} />
+          <Route path="" element={<TasksAdmin />} />
           <Route path="workwear" element={<WorkwearAdmin />} />
           <Route path="personal-info" element={<PersonalInfoAdmin />} />
           <Route path="notifications" element={<NotificationsAdmin />} />

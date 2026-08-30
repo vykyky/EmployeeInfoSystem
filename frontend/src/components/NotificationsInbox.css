@@ -1,0 +1,88 @@
+.ni-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  /* На ноуте — 2 колонки */
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+/* На телефоне — 1 колонка */
+@media (max-width: 640px) {
+  .ni-list {
+    grid-template-columns: 1fr;
+  }
+  .ni-item {
+    padding: 12px 36px 12px 12px;
+  }
+}
+
+.ni-item {
+  position: relative;
+  background: white;
+  border: 1px solid rgb(230, 230, 230);
+  border-left: 3px solid rgb(84, 107, 142);
+  border-radius: 8px;
+  padding: 14px 40px 14px 16px; /* место под крестик справа */
+  /* плавное приглушение при прочтении */
+  transition: opacity 0.4s ease, border-left-color 0.4s ease;
+}
+
+.ni-item--read {
+  border-left-color: rgb(230, 230, 230);
+  opacity: 0.55;
+}
+
+.ni-item-title {
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: rgb(33, 37, 41);
+  text-align: left;
+}
+
+.ni-item-body {
+  font-size: 14px;
+  color: rgb(87, 87, 86);
+  text-align: left;
+  line-height: 1.45;
+}
+
+.ni-item-date {
+  font-size: 12px;
+  color: rgb(170, 170, 170);
+  margin-top: 8px;
+  text-align: left;
+}
+
+.ni-item-delete {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  color: rgb(170, 170, 170);
+  padding: 5px 7px;
+  border-radius: 4px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.ni-item-delete:hover {
+  color: rgb(227, 6, 19);
+  background-color: rgba(227, 6, 19, 0.08);
+}
+
+.ni-empty {
+  color: rgb(150, 150, 150);
+  font-size: 15px;
+  text-align: left;
+}
+
+.ni-error {
+  color: rgb(227, 6, 19);
+}

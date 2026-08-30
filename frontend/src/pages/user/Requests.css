@@ -1,0 +1,27 @@
+
+.req-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px 24px;
+  max-width: 480px;
+}
+
+.req-error {
+  color: rgb(227, 6, 19);
+  font-size: 14px;
+  margin-top: 12px;
+  text-align: left;
+}
+
+.req-success {
+  color: rgb(84, 107, 142);
+  font-size: 14px;
+  margin-top: 12px;
+  text-align: left;
+}
+
+@media (max-width: 640px) {
+  .req-card {
+    padding: 16px 14px;
+  }
+}

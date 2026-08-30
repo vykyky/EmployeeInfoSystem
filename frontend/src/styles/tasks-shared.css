@@ -1,0 +1,169 @@
+
+.task-status-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* Принята / Назначена — нейтральный серый */
+.status-new,
+.status-assigned {
+  background: rgb(230, 230, 230);
+  color: rgb(87, 87, 86);
+}
+
+/* В работе — синий проекта */
+.status-in-progress {
+    background: rgb(84, 107, 142);
+    color: white;
+}
+
+/* Выполнена — тёмный серый (завершено) */
+.status-done {
+  background: rgb(87, 87, 86);
+  color: white;
+}
+
+/* ─── Детальная карточка ─── */
+
+.task-detail-back {
+  margin-bottom: 16px;
+}
+
+.task-detail-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 680px;
+}
+
+.task-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.task-detail-id {
+  font-size: 18px;
+  font-weight: 500;
+  color: rgb(33, 37, 41);
+}
+
+.task-detail-grid {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 12px 16px;
+  align-items: start;
+}
+
+.tdg-label {
+  font-size: 14px;
+  color: rgb(120, 120, 120);
+  padding-top: 2px;
+  text-align: left;
+}
+
+.tdg-value {
+  font-size: 15px;
+  color: rgb(33, 37, 41);
+  text-align: left;
+}
+
+.task-assign-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.task-assign-row select {
+  padding: 6px 8px;
+  font-size: 14px;
+  font-family: 'Jost', sans-serif;
+  border: 1px solid rgb(200, 200, 200);
+  border-radius: 4px;
+  outline: none;
+  max-width: 260px;
+}
+
+.task-assign-row select:focus {
+  border-color: rgb(84, 107, 142);
+}
+
+.task-detail-actions {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgb(230, 230, 230);
+}
+
+.task-action-error {
+  color: rgb(227, 6, 19);
+  font-size: 14px;
+  margin-top: 12px;
+}
+
+/* ─── Таблица задач ─── */
+
+.tasks-table-wrap {
+  border-radius: 12px; /* Укажи нужный радиус */
+  overflow: hidden;    /* Обрезает белые углы ячеек по радиусу */
+} 
+
+.tasks-table-wrap td{
+  background: white;
+}
+
+.tasks-table td:nth-child(2),
+.tasks-table td:nth-child(4) {
+  text-align: left;
+}
+
+.tasks-row {
+  cursor: pointer;
+}
+
+.tasks-row:hover td {
+  background-color: rgb(240, 243, 247);
+}
+
+.tasks-empty,
+.tasks-error-msg {
+  font-size: 15px;
+}
+
+.tasks-empty {
+  color: rgb(150, 150, 150);
+}
+
+.tasks-error-msg {
+  color: rgb(227, 6, 19);
+}
+
+@media (max-width: 640px) {
+  .tasks-table-wrap {
+    overflow-x: auto; /* горизонтальный скролл для таблицы задач */
+  }
+
+  .task-detail-card {
+    padding: 16px;
+  }
+
+  .task-detail-grid {
+    grid-template-columns: 110px 1fr;
+    gap: 10px 12px;
+  }
+
+  .task-assign-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .task-assign-row select {
+    max-width: 100%;
+    width: 100%;
+  }
+}

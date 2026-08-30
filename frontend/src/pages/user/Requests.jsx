@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getActiveRequestTypes } from '../../api/requestTypesApi';
 import { createRequest } from '../../api/requestsApi';
+import './Requests.css';
 
 export default function Requests() {
   const [types, setTypes] = useState([]);
@@ -18,18 +19,12 @@ export default function Requests() {
         if (data.length > 0) setRequestTypeId(String(data[0].id));
         setLoading(false);
       })
-      .catch(err => {
-        setError(err.message);
-        setLoading(false);
-      });
+      .catch(err => { setError(err.message); setLoading(false); });
   }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!requestTypeId) {
-      setError('Выберите тип запроса');
-      return;
-    }
+    if (!requestTypeId) { setError('Выберите тип запроса'); return; }
 
     setSubmitting(true);
     setError(null);
@@ -40,13 +35,13 @@ export default function Requests() {
     try {
       await createRequest({
         requestTypeId: parseInt(requestTypeId, 10),
-        comment: comment.trim() || null
+        comment: comment.trim() || null,
       });
       setComment('');
       setSuccess(
         selectedType
-          ? `Электронный запрос «${selectedType.name}» принят`
-          : 'Электронный запрос принят'
+          ? `Запрос «${selectedType.name}» принят`
+          : 'Запрос принят'
       );
     } catch (err) {
       setError(err.message);
@@ -55,49 +50,52 @@ export default function Requests() {
     }
   }
 
-  if (loading) return <div>Загрузка...</div>;
+  if (loading) return <div className="page">Загрузка...</div>;
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="request-type">Тип запроса</label>
-          <select
-            id="request-type"
-            value={requestTypeId}
-            onChange={(e) => setRequestTypeId(e.target.value)}
-            disabled={submitting || types.length === 0}
+    <div className="page">
+      <div className="req-card">
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="request-type">Тип запроса</label>
+            <select
+              id="request-type"
+              value={requestTypeId}
+              onChange={(e) => setRequestTypeId(e.target.value)}
+              disabled={submitting || types.length === 0}
+            >
+              {types.length === 0 && <option value="">Нет доступных типов</option>}
+              {types.map(t => (
+                <option key={t.id} value={t.id}>{t.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="request-comment">Комментарий</label>
+            <textarea
+              id="request-comment"
+              placeholder="Дополнительная информация..."
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              rows={4}
+              disabled={submitting}
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-primary"
+            style={{ fontSize: 15 }}
+            disabled={submitting || !requestTypeId}
           >
-            {types.length === 0 && <option value="">Нет доступных типов</option>}
-            {types.map(t => (
-              <option key={t.id} value={t.id}>{t.name}</option>
-            ))}
-          </select>
-        </div>
+            {submitting ? 'Отправка...' : 'Запросить'}
+          </button>
+        </form>
 
-        <div className="form-group">
-          <label htmlFor="request-comment">Комментарии</label>
-          <textarea
-            id="request-comment"
-            placeholder="Комментарии..."
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            rows={4}
-            disabled={submitting}
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="btn btn-primary"
-          disabled={submitting || !requestTypeId}
-        >
-          Запросить
-        </button>
-      </form>
-
-      {error && <p style={{ color: 'red', marginTop: 12 }}>{error}</p>}
-      {success && <p style={{ color: 'green', marginTop: 12 }}>{success}</p>}
+        {error && <p className="req-error">{error}</p>}
+        {success && <p className="req-success">{success}</p>}
+      </div>
     </div>
   );
 }

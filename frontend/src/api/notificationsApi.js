@@ -34,3 +34,18 @@ export async function markNotificationRead(id) {
 
     return response;
 }
+
+// Новое: удаление уведомления
+export async function deleteNotification(id) {
+    const response = await fetch(`${API_URL}/api/notifications/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.error || "Не удалось удалить уведомление");
+    }
+
+    return response;
+}

@@ -24,6 +24,7 @@ namespace EmployeeInfoSystem.Application.Interfaces.Services
         Task<List<NotificationDto>> GetMyTasksAsync(int userId);
         Task<List<NotificationDto>> GetAllTasksAsync();
 
+        Task<Result> DeleteAsync(int notificationId, int userId);
         Task<Result> MarkAsReadAsync(int notificationId, int userId);
     }
 }

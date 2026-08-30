@@ -3,18 +3,21 @@ import { useState } from "react"
 import Header from "../../components/Header"
 import Footer from "../../components/Footer"
 import { login, saveAuth } from "../../api/authApi"
+import { subscribeToPush, sendSubscriptionToServer } from "../../api/pushApi"
+import { useNotifications } from "../../context/NotificationsContext" // ← добавить
 import "./Login.css"
 import { FaEye, FaEyeSlash } from "react-icons/fa"
 
 export default function Login() {
   const navigate = useNavigate()
+  const { load: loadNotifications } = useNotifications() // ← добавить
 
   const [tabn, setTabn] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  
+
   const handleAuth = async () => {
     setError("")
 
@@ -27,6 +30,18 @@ export default function Login() {
     try {
       const data = await login(tabn.trim(), password)
       saveAuth(data.token, data.role, data.fio, data.id)
+
+      // ← добавить: подгружаем уведомления сразу после того, как токен сохранён
+      loadNotifications()
+
+      try {
+        const sub = await subscribeToPush()
+        if (sub) {
+          await sendSubscriptionToServer(sub)
+        }
+      } catch (pushErr) {
+        console.error("Не удалось оформить Push-подписку:", pushErr)
+      }
 
       if (data.role === "admin") navigate("/admin")
       else if (data.role === "manager") navigate("/manager")
@@ -97,7 +112,6 @@ export default function Login() {
           >
             {loading ? "Вход..." : "Войти"}
           </button>
-
 
         </div>
       </main>

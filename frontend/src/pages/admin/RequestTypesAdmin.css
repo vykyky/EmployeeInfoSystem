@@ -9,11 +9,16 @@
     max-width: 440px;
 }
 
+.types-table td:first-child {
+    text-align: left;
+}
+
 .rt-form-title {
     font-size: 20px;
     font-weight: 500;
     margin: 0 0 16px 0;
 }
+
 
 .rt-form-actions {
     display: flex;
@@ -45,8 +50,8 @@
 /* обёртка таблицы типов */
 .rt-wrap {
     background: rgb(242, 242, 242);
-  
-    overflow-x: auto;
+    border-radius: 12px; /* Укажи нужный радиус */
+    overflow: hidden; 
 }
 
 .rt-input {
@@ -74,4 +79,14 @@
     color: rgb(227, 6, 19);
     font-size: 13px;
     margin-left: 4px;
+}
+
+@media (max-width: 640px) {
+  .rt-wrap {
+    overflow-x: auto;
+  }
+
+  .rt-form-wrap {
+    max-width: 100%;
+  }
 }

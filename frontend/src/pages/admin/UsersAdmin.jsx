@@ -1,40 +1,26 @@
 import { useEffect, useState } from "react";
 import { getAllUsers, createUser, deleteUser, changeUserRole } from "../../api/usersApi";
 import "./UsersAdmin.css";
-import { FaEye, FaEyeSlash } from "react-icons/fa"
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
+const ROLE_LABELS = {
+    admin: 'Администратор',
+    manager: 'Менеджер',
+    employee: 'Сотрудник'
+};
 const ROLES = ["employee", "manager", "admin"];
-
-function validate(form) {
-    const errors = {};
-
-    if (!form.tabn.trim())
-        errors.tabn = "Введите табельный номер";
-
-    if (!form.password)
-        errors.password = "Введите пароль";
-    else if (form.password.length < 6)
-        errors.password = "Пароль не менее 6 символов";
-
-    if (!form.role)
-        errors.role = "Выберите роль";
-
-    return errors;
-}
 
 export default function UsersAdmin() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-
     // форма регистрации
     const [showForm, setShowForm] = useState(false);
     const [form, setForm] = useState({ tabn: "", password: "", role: "employee" });
-    const [formErrors, setFormErrors] = useState({});
     const [formLoading, setFormLoading] = useState(false);
     const [formError, setFormError] = useState("");
-    const [showPassword, setShowPassword] = useState(false)
+    const [showPassword, setShowPassword] = useState(false);
 
     // смена роли
     const [roleEditing, setRoleEditing] = useState(null);
@@ -48,6 +34,16 @@ export default function UsersAdmin() {
     useEffect(() => {
         loadUsers();
     }, []);
+
+    useEffect(() => {
+        function handleKeyDown(e) {
+            if (e.key === 'Escape' && showForm) {
+                handleCancelForm();
+            }
+        }
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [showForm]);
 
     async function loadUsers() {
         setLoading(true);
@@ -65,17 +61,15 @@ export default function UsersAdmin() {
     function handleFormChange(e) {
         const { name, value } = e.target;
         setForm(prev => ({ ...prev, [name]: value }));
-        if (formErrors[name])
-            setFormErrors(prev => ({ ...prev, [name]: "" }));
+        if (formError) setFormError("");
     }
+
+    // Проверка корректности ввода для активации кнопки
+    const isFormValid = form.tabn.trim().length > 0 && form.password.trim().length >= 6;
 
     async function handleCreate(e) {
         e.preventDefault();
-        const errors = validate(form);
-        if (Object.keys(errors).length > 0) {
-            setFormErrors(errors);
-            return;
-        }
+        if (!isFormValid) return;
 
         setFormLoading(true);
         setFormError("");
@@ -94,7 +88,6 @@ export default function UsersAdmin() {
     function handleCancelForm() {
         setShowForm(false);
         setForm({ tabn: "", password: "", role: "employee" });
-        setFormErrors({});
         setFormError("");
     }
 
@@ -134,8 +127,8 @@ export default function UsersAdmin() {
 
     return (
         <div className="page">
+            
             <div className="page-header">
-              
                 <button
                     className="btn btn-primary"
                     onClick={() => setShowForm(true)}
@@ -145,79 +138,78 @@ export default function UsersAdmin() {
             </div>
 
             {showForm && (
-                <div className="users-form-wrap">
-                    <h2 className="users-form-title">Новый пользователь</h2>
-                    <form onSubmit={handleCreate} noValidate>
-                        <div className="form-group">
-                            <label>Табельный номер</label>
-                            <input
-                                name="tabn"
-                                value={form.tabn}
-                                onChange={handleFormChange}
-                                placeholder="000001"
-                                autoComplete="off"
-                            />
-                            {formErrors.tabn && <span className="users-field-error">{formErrors.tabn}</span>}
-                        </div>
-
-                       
-                        <div className="form-group password-group">
-                            <label>Пароль</label>
-                            <div className="input-wrapper">
-                                <input
-                                    name="password"
-                                    type={showPassword ? "text" : "password"}
-                                    value={form.password}
-                                    onChange={handleFormChange}
-                                    placeholder="Минимум 6 символов"
-                                />
-                            
-                                <button
-                                    type="button"
-                                    className="eye-btn"
-                                    onClick={() => setShowPassword(prev => !prev)}
-                                    >
-                                    {showPassword ? <FaEyeSlash /> : <FaEye />}
-                                </button>
-                            </div>
-                            {formErrors.password && <span className="users-field-error">{formErrors.password}</span>}   
-                        </div>      
-
-                        <div className="form-group">
-                            <label>Роль</label>
-                            <select
-                                name="role"
-                                value={form.role}
-                                onChange={handleFormChange}
-                            >
-                                {ROLES.map(r => (
-                                    <option key={r} value={r}>{r}</option>
-                                ))}
-                            </select>
-                            {formErrors.role && <span className="users-field-error">{formErrors.role}</span>}
-                        </div>
-
-                        {formError && <p className="users-field-error">{formError}</p>}
-
-                        <div className="users-form-actions">
-                            
+                <div className="modal-overlay" onClick={handleCancelForm}>
+                    <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2 className="modal-title">Новый пользователь</h2>
                             <button
                                 type="button"
-                                className="btn btn-secondary"
+                                className="modal-close-btn"
                                 onClick={handleCancelForm}
-                                disabled={formLoading}
                             >
-                                Отмена
-                            </button>
-                            <button
-                                type="submit"
-                                className="btn btn-primary"
-                                disabled={formLoading}
-                            >
-                                {formLoading ? "Сохранение..." : "Зарегистрировать"}
+                                ✕
                             </button>
                         </div>
-                    </form>
+                        <form onSubmit={handleCreate} noValidate>
+                            <div className="form-group">
+                                <label>Табельный номер</label>
+                                <input
+                                    name="tabn"
+                                    value={form.tabn}
+                                    onChange={handleFormChange}
+                                    placeholder="000001"
+                                    autoComplete="off"
+                                    autoFocus
+                                />
+                            </div>
+
+                            <div className="form-group password-group">
+                                <label>Пароль</label>
+                                <div className="input-wrapper">
+                                    <input
+                                        name="password"
+                                        type={showPassword ? "text" : "password"}
+                                        value={form.password}
+                                        onChange={handleFormChange}
+                                        placeholder="Минимум 6 символов"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="eye-btn"
+                                        onClick={() => setShowPassword(prev => !prev)}
+                                    >
+                                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                    </button>
+                                </div>
+                            </div>      
+
+                            <div className="form-group">
+                                <label>Роль</label>
+                                <select
+                                    name="role"
+                                    value={form.role}
+                                    onChange={handleFormChange}
+                                >
+                                    {ROLES.map(r => (
+                                        <option key={r} value={r}>{ROLE_LABELS[r]}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {formError && <p className="users-field-error">{formError}</p>}
+
+                            <div className="users-form-actions">
+                                
+                                <button
+                                    type="submit"
+                                    className="btn btn-primary"
+                                    disabled={formLoading || !isFormValid}
+                                >
+                                    {formLoading ? "Сохранение..." : "Зарегистрировать"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             )}
 
@@ -225,10 +217,10 @@ export default function UsersAdmin() {
                 <p>Пользователей пока нет</p>
             ) : (
                 <div className="users-table-wrap">
-                    <table className="table">
+                    <table className="table users-table">
                         <thead>
                             <tr>
-                                <th>Табельный №</th>
+                                <th>Табельный</th>
                                 <th>ФИО</th>
                                 <th>Роль</th>
                                 <th>Дата регистрации</th>
@@ -250,7 +242,7 @@ export default function UsersAdmin() {
                                                     onChange={e => setNewRole(e.target.value)}
                                                 >
                                                     {ROLES.map(r => (
-                                                        <option key={r} value={r}>{r}</option>
+                                                        <option key={r} value={r}>{ROLE_LABELS[r]}</option>
                                                     ))}
                                                 </select>
                                                 <button
@@ -274,7 +266,7 @@ export default function UsersAdmin() {
                                                 onClick={() => startRoleEdit(user)}
                                                 title="Нажмите чтобы изменить роль"
                                             >
-                                                {user.role}
+                                                {ROLE_LABELS[user.role] || user.role}
                                             </span>
                                         )}
                                     </td>

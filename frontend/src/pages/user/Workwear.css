@@ -1,0 +1,72 @@
+.ww-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px 24px;
+  max-width: 480px;
+  margin-top: 16px;
+}
+
+.ww-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.ww-hint {
+  font-size: 13px;
+  color: rgb(150, 150, 150);
+  margin-top: 12px;
+  text-align: left;
+}
+
+.ww-success {
+  font-size: 14px;
+  color: rgb(84, 107, 142);
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.ww-submit-error {
+  font-size: 14px;
+  color: rgb(227, 6, 19);
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.ww-error {
+  color: rgb(227, 6, 19);
+}
+
+.ww-table-wrap {
+  background: white;
+  border-radius: 8px;
+  overflow-x: auto;
+  max-width: 800px;
+}
+
+.ww-table-wrap .table td {
+  text-align: left;
+}
+
+.ww-empty {
+  font-size: 15px;
+  color: rgb(150, 150, 150);
+}
+
+@media (max-width: 640px) {
+  .ww-table-wrap {
+    overflow-x: auto;
+  }
+
+  .ww-card {
+    padding: 16px 14px;
+  }
+
+  .ww-actions {
+    flex-direction: column;
+  }
+
+  .ww-actions .btn {
+    width: 100%;
+  }
+}

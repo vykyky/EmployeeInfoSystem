@@ -45,22 +45,24 @@ export default function NewsDetails() {
           className="news-back-btn"
           onClick={() => navigate(newsListPath)}
         >
-          ← Назад к списку
+          Назад
         </button>
 
         <h1 className="news-details-title">{item.title}</h1>
 
-        <small className="news-date">
+        <span className="news-details-date">
           {new Date(item.createdAt).toLocaleDateString("ru-RU")}
-        </small>
+        </span>
 
-        {item.imagePath && (
-          <div className="news-details-image">
-            <img src={`${API_URL}/${item.imagePath}`} />
-          </div>
-        )}
+        <div className={`news-details-body-wrap${!item.imagePath ? " news-details-body-wrap--no-image" : ""}`}>
+          {item.imagePath && (
+            <div className="news-details-image">
+              <img src={`${API_URL}/${item.imagePath}`} alt={item.title} />
+            </div>
+          )}
 
-        <p className="news-details-body">{item.body}</p>
+          <p className="news-details-body">{item.body}</p>
+        </div>
 
       </div>
     </div>

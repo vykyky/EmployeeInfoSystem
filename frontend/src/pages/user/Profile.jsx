@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from 'react';
-// Импортируем обе функции
-import { getProfile, sendProfileUpdateRequest } from '../../api/profileApi'; 
+import { getProfile, sendProfileUpdateRequest } from '../../api/profileApi';
+import './Profile.css';
 
 export default function Profile() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Стейты для редактирования
   const [isEditing, setIsEditing] = useState(false);
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
 
-  // Стейты для процесса отправки и фидбека
   const [submitting, setSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [submitError, setSubmitError] = useState(null);
@@ -25,32 +23,23 @@ export default function Profile() {
         setEmail(data.email || '');
         setLoading(false);
       })
-      .catch(err => {
-        setError(err.message); 
-        setLoading(false);
-      });
+      .catch(err => { setError(err.message); setLoading(false); });
   }, []);
 
-  const isChanged = 
-    phone !== (profile?.phone || '') || 
+  const isChanged =
+    phone !== (profile?.phone || '') ||
     email !== (profile?.email || '');
 
   const handleSendRequest = async () => {
     if (!isChanged) return;
-
     setSubmitting(true);
     setSubmitError(null);
     setSuccessMessage('');
-
     try {
-      // Вызываем реальный API-запрос
       await sendProfileUpdateRequest(phone, email);
-      
-      // Если всё ок, выводим красивый статус
-      setSuccessMessage('Запрос на изменение контактов успешно зарегистрирован и отправлен менеджеру!');
+      setSuccessMessage('Запрос на изменение контактов отправлен менеджеру.');
       setIsEditing(false);
     } catch (err) {
-      // Если бэкенд вернул ошибку, покажем её
       setSubmitError(err.message);
     } finally {
       setSubmitting(false);
@@ -64,85 +53,95 @@ export default function Profile() {
     setIsEditing(false);
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '—';
-    return new Date(dateString).toLocaleDateString('ru-RU');
-  };
+  const formatDate = (d) => (d ? new Date(d).toLocaleDateString('ru-RU') : '—');
 
-  if (loading) return <div>Загрузка профиля...</div>;
-  if (error) return <div>Ошибка: {error}</div>;
+  if (loading) return <div className="page">Загрузка...</div>;
+  if (error) return <div className="page profile-error">Ошибка: {error}</div>;
 
   return (
-    <div>
-      <h2>Личная информация</h2>
-      <div>
-        <p><strong>ФИО:</strong> {profile.fio || 'Не указано'}</p>
-        <p><strong>Дата рождения:</strong> {formatDate(profile.bornDate)}</p>
-        <p><strong>Дата приема:</strong> {formatDate(profile.hireDate)}</p>
+    <div className="page">
+
+      {/* Личная информация */}
+      <div className="profile-card">
+        <div className="profile-grid">
+          <div className="profile-label">ФИО</div>
+          <div className="profile-value">{profile.fio || '—'}</div>
+
+          <div className="profile-label">Дата рождения</div>
+          <div className="profile-value">{formatDate(profile.bornDate)}</div>
+
+          <div className="profile-label">Дата приёма</div>
+          <div className="profile-value">{formatDate(profile.hireDate)}</div>
+        </div>
       </div>
 
-      <h2>Настройка пользователя</h2>
+      {/* Контакты */}
+      <div className="profile-card" style={{ marginTop: 16 }}>
+        {successMessage && (
+          <p className="profile-success">{successMessage}</p>
+        )}
+        {submitError && (
+          <p className="profile-submit-error">Ошибка: {submitError}</p>
+        )}
 
-      {/* Вывод системных сообщений под заголовком */}
-      {successMessage && (
-        <div style={{ color: 'green', backgroundColor: '#e6ffe6', padding: '10px', borderRadius: '4px', marginBottom: '10px' }}>
-          ✓ {successMessage}
-        </div>
-      )}
-      {submitError && (
-        <div style={{ color: 'red', backgroundColor: '#ffe6e6', padding: '10px', borderRadius: '4px', marginBottom: '10px' }}>
-          ⚠ Ошибка при отправке: {submitError}
-        </div>
-      )}
-      
-      <div>
-        <div>
-          <label>Телефон </label>
-          <input 
-            type="text" 
-            value={phone} 
+        <div className="form-group">
+          <label>Телефон</label>
+          <input
+            type="text"
+            value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            disabled={!isEditing || submitting} 
+            disabled={!isEditing || submitting}
             placeholder="+375 (XX) XXX-XX-XX"
           />
         </div>
 
-        <div>
-          <label>Email </label>
-          <input 
-            type="email" 
-            value={email} 
+        <div className="form-group">
+          <label>Email</label>
+          <input
+            type="email"
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
-            disabled={!isEditing || submitting} 
+            disabled={!isEditing || submitting}
             placeholder="example@mail.com"
           />
         </div>
 
-        <div style={{ marginTop: '10px' }}>
+        <div className="profile-actions">
           {isEditing ? (
             <>
-              <button 
-                type="button" 
+              <button
+                className="btn btn-primary"
+                style={{ fontSize: 15 }}
                 onClick={handleSendRequest}
                 disabled={!isChanged || submitting}
               >
-                {submitting ? 'Отправка...' : 'Отправить запрос на изменение'}
+                {submitting ? 'Отправка...' : 'Отправить запрос'}
               </button>
-              <button type="button" onClick={handleCancel} disabled={submitting} style={{ marginLeft: '8px' }}>
+              <button
+                className="btn btn-secondary"
+                style={{ fontSize: 15 }}
+                onClick={handleCancel}
+                disabled={submitting}
+              >
                 Отмена
               </button>
             </>
           ) : (
-            <button type="button" onClick={() => { setIsEditing(true); setSuccessMessage(''); }}>
+            <button
+              className="btn btn-primary"
+              style={{ fontSize: 15 }}
+              onClick={() => { setIsEditing(true); setSuccessMessage(''); }}
+            >
               Изменить данные
             </button>
           )}
         </div>
+
+        <p className="profile-hint">
+          Изменение телефона и e-mail производится через подачу запроса. Изменения будут видны после обработки.
+        </p>
       </div>
 
-      <div style={{ fontSize: '0.85em', color: '#666', marginTop: '15px' }}>
-        *Изменение номера телефона и e-mail производится через подачу запроса. Изменения будут видны после обработки запроса.
-      </div>
     </div>
   );
 }

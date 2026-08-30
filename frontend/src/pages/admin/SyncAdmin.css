@@ -27,3 +27,13 @@
 .sync-status-error {
     color: rgb(227, 6, 19);
 }
+
+@media (max-width: 640px) {
+  .sync-actions {
+    flex-direction: column;
+  }
+
+  .sync-actions .btn {
+    width: 100%;
+  }
+}

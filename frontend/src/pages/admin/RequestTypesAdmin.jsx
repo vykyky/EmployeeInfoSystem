@@ -30,6 +30,17 @@ export default function RequestTypes() {
         loadTypes();
     }, []);
 
+    // Закрытие модального окна по нажатию клавиши Escape
+    useEffect(() => {
+        function handleKeyDown(e) {
+            if (e.key === 'Escape' && showForm) {
+                handleCancelForm();
+            }
+        }
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [showForm]);
+
     function loadTypes() {
         setLoading(true);
         getAllRequestTypes()
@@ -126,57 +137,62 @@ export default function RequestTypes() {
             </div>
 
             {showForm && (
-                <div className="rt-form-wrap">
-                    <h2 className="rt-form-title">Новый тип заявки</h2>
-                    <form onSubmit={handleCreate} noValidate>
-                        <div className="form-group">
-                            <label>Название</label>
-                            <input
-                                value={newName}
-                                onChange={(e) => setNewName(e.target.value)}
-                                placeholder="Название типа"
-                                disabled={creating}
-                                autoComplete="off"
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label className="rt-checkbox-label">
-                                <input
-                                    type="checkbox"
-                                    checked={newActive}
-                                    onChange={(e) => setNewActive(e.target.checked)}
-                                    disabled={creating}
-                                />
-                                Активен
-                            </label>
-                        </div>
-
-                        {createError && <p className="rt-field-error">{createError}</p>}
-
-                        <div className="rt-form-actions">
+                <div className="modal-overlay" onClick={handleCancelForm}>
+                    <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2 className="modal-title">Новый тип запроса</h2>
                             <button
                                 type="button"
-                                className="btn btn-secondary"
+                                className="modal-close-btn"
                                 onClick={handleCancelForm}
-                                disabled={creating}
                             >
-                                Отмена
-                            </button>
-                            <button
-                                type="submit"
-                                className="btn btn-primary"
-                                disabled={creating || !newName.trim()}
-                            >
-                                {creating ? "Добавление..." : "Добавить"}
+                                ✕
                             </button>
                         </div>
-                    </form>
+                        <form onSubmit={handleCreate} noValidate>
+                            <div className="form-group">
+                                <label>Название</label>
+                                <input
+                                    value={newName}
+                                    onChange={(e) => setNewName(e.target.value)}
+                                    placeholder="Название типа"
+                                    disabled={creating}
+                                    autoComplete="off"
+                                    autoFocus
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="rt-checkbox-label">
+                                    <input
+                                        type="checkbox"
+                                        checked={newActive}
+                                        onChange={(e) => setNewActive(e.target.checked)}
+                                        disabled={creating}
+                                    />
+                                    Активен
+                                </label>
+                            </div>
+
+                            {createError && <p className="rt-field-error">{createError}</p>}
+
+                            <div className="rt-form-actions">
+                               
+                                <button
+                                    type="submit"
+                                    className="btn btn-primary"
+                                    disabled={creating || !newName.trim()}
+                                >
+                                    {creating ? "Добавление..." : "Добавить"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             )}
 
             <div className="rt-wrap">
-                <table className="table">
+                <table className="table types-table">
                     <thead>
                         <tr>
                             <th>Название</th>

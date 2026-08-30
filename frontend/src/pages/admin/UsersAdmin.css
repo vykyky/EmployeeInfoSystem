@@ -3,6 +3,9 @@
 .users-error {
     color: rgb(227, 6, 19);
 }
+.users-table td:nth-child(2) {
+    text-align: left;
+}
 
 /* карточка с формой регистрации (по аналогии с .login-container) */
 .users-form-wrap {
@@ -68,8 +71,8 @@
 /* обёртка таблицы пользователей */
 .users-table-wrap {
     background: rgb(242, 242, 242);
-
-    overflow-x: auto;
+    border-radius: 12px; /* Укажи нужный радиус */
+    overflow: hidden; 
 }
 
 /* маленькие кнопки внутри строк таблицы */
@@ -99,4 +102,18 @@
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .users-table-wrap {
+    overflow-x: auto;
+  }
+
+  .users-role-edit {
+    flex-wrap: wrap;
+  }
+
+  .users-delete-confirm {
+    flex-wrap: wrap;
+  }
 }

@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { getWorkwear, sendWorkwearUpdateRequest } from '../../api/workwearApi';
+import './Workwear.css';
 
 export default function Workwear() {
   const [workwear, setWorkwear] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Стейты редактирования размеров
   const [isEditing, setIsEditing] = useState(false);
   const [clothesSize, setClothesSize] = useState('');
   const [shoesSize, setShoesSize] = useState('');
 
-  // Стейты отправки формы
   const [submitting, setSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [submitError, setSubmitError] = useState(null);
@@ -24,10 +23,7 @@ export default function Workwear() {
         setShoesSize(data.shoesSize ?? '');
         setLoading(false);
       })
-      .catch(err => {
-        setError(err.message);
-        setLoading(false);
-      });
+      .catch(err => { setError(err.message); setLoading(false); });
   }, []);
 
   const isChanged =
@@ -36,15 +32,12 @@ export default function Workwear() {
 
   const handleSendRequest = async () => {
     if (!isChanged) return;
-
     setSubmitting(true);
     setSubmitError(null);
     setSuccessMessage('');
-
     try {
       await sendWorkwearUpdateRequest(clothesSize, shoesSize);
-      
-      setSuccessMessage('Запрос на изменение размеров спецодежды успешно создан!');
+      setSuccessMessage('Запрос на изменение размеров создан.');
       setIsEditing(false);
     } catch (err) {
       setSubmitError(err.message);
@@ -60,10 +53,7 @@ export default function Workwear() {
     setIsEditing(false);
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '—';
-    return new Date(dateString).toLocaleDateString('ru-RU');
-  };
+  const formatDate = (d) => (d ? new Date(d).toLocaleDateString('ru-RU') : '—');
 
   const formatWearPeriod = (months) => {
     if (months === null || months === undefined) return '—';
@@ -71,103 +61,112 @@ export default function Workwear() {
     return `${months} мес.`;
   };
 
-  if (loading) return <div>Загрузка данных по спец. одежде...</div>;
-  if (error) return <div>Ошибка: {error}</div>;
+  if (loading) return <div className="page">Загрузка...</div>;
+  if (error) return <div className="page ww-error">Ошибка: {error}</div>;
 
   return (
-    <div>
-      <h2>Спец. одежда</h2>
+    <div className="page">
 
-      {successMessage && (
-        <div style={{ color: 'green', backgroundColor: '#e6ffe6', padding: '10px', borderRadius: '4px', marginBottom: '10px' }}>
-          ✓ {successMessage}
+    
+
+      {/* Таблица выданной одежды */}
+      {workwear.items && workwear.items.length > 0 ? (
+        <div className="ww-table-wrap">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Наименование</th>
+                <th>Группа</th>
+                <th>Дата выдачи</th>
+                <th>Дата окончания</th>
+                <th>Количество</th>
+                <th>Срок носки</th>
+              </tr>
+            </thead>
+            <tbody>
+              {workwear.items.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.itemName || '—'}</td>
+                  <td>{item.groupName || '—'}</td>
+                  <td>{formatDate(item.giveDate)}</td>
+                  <td>{formatDate(item.endDate)}</td>
+                  <td>{item.quantity ?? '—'}</td>
+                  <td>{formatWearPeriod(item.wearPeriod)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      )}
-      {submitError && (
-        <div style={{ color: 'red', backgroundColor: '#ffe6e6', padding: '10px', borderRadius: '4px', marginBottom: '10px' }}>
-          ⚠ Ошибка при отправке: {submitError}
-        </div>
+      ) : (
+        <p className="ww-empty">Спец. одежда не выдана</p>
       )}
 
-      <div>
-        <div>
-          <label>Размер одежды </label>
+        {/* Размеры */}
+      <div className="ww-card">
+        {successMessage && <p className="ww-success">{successMessage}</p>}
+        {submitError && <p className="ww-submit-error">Ошибка: {submitError}</p>}
+
+        <div className="ww-sizes">
+        <div className="form-group">
+          <label>Размер одежды</label>
           <input
             type="number"
             value={clothesSize}
             onChange={(e) => setClothesSize(e.target.value === '' ? '' : Number(e.target.value))}
             disabled={!isEditing || submitting}
             placeholder="—"
+            style={{ maxWidth: 120 }}
           />
         </div>
 
-        <div>
-          <label>Размер обуви </label>
+        <div className="form-group">
+          <label>Размер обуви</label>
           <input
             type="number"
             value={shoesSize}
             onChange={(e) => setShoesSize(e.target.value === '' ? '' : Number(e.target.value))}
             disabled={!isEditing || submitting}
             placeholder="—"
+            style={{ maxWidth: 120 }}
           />
         </div>
-
-        <div style={{ marginTop: '10px' }}>
+        </div>
+        <div className="ww-actions">
           {isEditing ? (
             <>
               <button
-                type="button"
+                className="btn btn-primary"
+                style={{ fontSize: 15 }}
                 onClick={handleSendRequest}
                 disabled={!isChanged || submitting}
               >
-                {submitting ? 'Отправка...' : 'Отправить запрос на изменение'}
+                {submitting ? 'Отправка...' : 'Отправить запрос'}
               </button>
-              <button type="button" onClick={handleCancel} disabled={submitting} style={{ marginLeft: '8px' }}>
+              <button
+                className="btn btn-secondary"
+                style={{ fontSize: 15 }}
+                onClick={handleCancel}
+                disabled={submitting}
+              >
                 Отмена
               </button>
             </>
           ) : (
-            <button type="button" onClick={() => { setIsEditing(true); setSuccessMessage(''); }}>
+            <button
+              className="btn btn-primary"
+              style={{ fontSize: 15 }}
+              onClick={() => { setIsEditing(true); setSuccessMessage(''); }}
+            >
               Изменить размер
             </button>
           )}
         </div>
+
+        <p className="ww-hint">
+          Изменение размеров производится через подачу запроса. Изменения будут видны после обработки.
+        </p>
       </div>
 
-      <div style={{ fontSize: '0.85em', color: '#666', marginTop: '15px', marginBottom: '20px' }}>
-        *Изменение размеров производится через подачу запроса. Изменения будут видны после обработки запроса.
-      </div>
-
-      <h4>Выданная спец. одежда</h4>
-      {/* Остальной код таблицы оставляем прежним */}
-      {workwear.items && workwear.items.length > 0 ? (
-        <table border="1">
-          <thead>
-            <tr>
-              <th>Наименование</th>
-              <th>Группа</th>
-              <th>Дата выдачи</th>
-              <th>Дата окончания</th>
-              <th>Количество</th>
-              <th>Срок носки</th>
-            </tr>
-          </thead>
-          <tbody>
-            {workwear.items.map((item, index) => (
-              <tr key={index}>
-                <td>{item.itemName || '—'}</td>
-                <td>{item.groupName || '—'}</td>
-                <td>{formatDate(item.giveDate)}</td>
-                <td>{formatDate(item.endDate)}</td>
-                <td>{item.quantity ?? '—'}</td>
-                <td>{formatWearPeriod(item.wearPeriod)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <p>Спец. одежда не выдана</p>
-      )}
     </div>
   );
 }

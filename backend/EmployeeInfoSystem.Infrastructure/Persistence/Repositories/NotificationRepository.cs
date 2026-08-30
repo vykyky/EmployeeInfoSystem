@@ -64,5 +64,6 @@ namespace EmployeeInfoSystem.Infrastructure.Persistence.Repositories
             if (entity is not null)
                 _db.Notifications.Remove(entity);
         }
+
     }
 }

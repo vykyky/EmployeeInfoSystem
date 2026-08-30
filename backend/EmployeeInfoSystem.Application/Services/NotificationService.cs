@@ -1,5 +1,7 @@
 ﻿using EmployeeInfoSystem.Application.Common;
+using EmployeeInfoSystem.Application.DTOs;
 using EmployeeInfoSystem.Application.DTOs.Notification;
+using EmployeeInfoSystem.Application.DTOs.PushSubscription;
 using EmployeeInfoSystem.Application.Interfaces;
 using EmployeeInfoSystem.Application.Interfaces.Services;
 using EmployeeInfoSystem.Domain;
@@ -14,10 +16,12 @@ namespace EmployeeInfoSystem.Application.Services
     public class NotificationService : INotificationService
     {
         private readonly IUnitOfWork _uow;
+        private readonly IPushNotificationService _pushService; // 1. Внедряем Push-сервис
 
-        public NotificationService(IUnitOfWork uow)
+        public NotificationService(IUnitOfWork uow, IPushNotificationService pushService)
         {
             _uow = uow;
+            _pushService = pushService; // 2. Сохраняем в поле
         }
 
         public static string StatusLabel(string status) => status switch
@@ -37,8 +41,10 @@ namespace EmployeeInfoSystem.Application.Services
         private static string TypeName(Request request) =>
             request.RequestType?.Name ?? request.RequestTypeId.ToString();
 
+        // 3. Дополняем метод сохранения: запись в БД + Push-уведомление!
         private async Task AddInboxAsync(int recipientId, int? senderId, string title, string body)
         {
+            // Сохранение в БД на сайте
             await _uow.Notifications.AddAsync(new Notification
             {
                 RecipientId = recipientId,
@@ -49,6 +55,17 @@ namespace EmployeeInfoSystem.Application.Services
                 CreatedAt = DateTime.UtcNow,
                 RequestId = null
             });
+
+            // Отправка браузерного Push-уведомления
+            var payload = new PushNotificationPayload
+            {
+                Title = title,
+                Body = body,
+                Url = "/notifications" // Ссылка, куда перейдет юзер при клике на пуш
+            };
+
+            // Вызываем push-сервис
+            await _pushService.SendNotificationToUserAsync(recipientId, payload);
         }
 
         private async Task NotifyEmployeeStatusAsync(Request request, bool includeResponsible)
@@ -79,10 +96,8 @@ namespace EmployeeInfoSystem.Application.Services
 
         public async Task NotifyNewRequestAsync(Request request)
         {
-            // Сотруднику: Принята (тип + статус)
             await NotifyEmployeeStatusAsync(request, includeResponsible: false);
 
-            // Админам: поступление нового электронного запроса
             var typeName = TypeName(request);
             var employee = request.Employee?.EmployeeProfile?.Fio
                 ?? request.Employee?.Tabn
@@ -96,10 +111,8 @@ namespace EmployeeInfoSystem.Application.Services
 
         public async Task NotifyRequestAssignedAsync(Request request)
         {
-            // Сотруднику: Назначена (тип + статус + ответственный)
             await NotifyEmployeeStatusAsync(request, includeResponsible: true);
 
-            // Менеджеру: назначен на задачу (админу при самоназначении не дублируем)
             if (request.ManagerId.HasValue && request.Manager?.Role == "manager")
             {
                 var typeName = TypeName(request);
@@ -120,7 +133,6 @@ namespace EmployeeInfoSystem.Application.Services
         {
             await NotifyEmployeeStatusAsync(request, includeResponsible: true);
 
-            // Админам: выполнение системных запросов (для последующей синхронизации)
             if (request.RequestType?.IsSystem == true)
             {
                 var typeName = TypeName(request);
@@ -153,20 +165,14 @@ namespace EmployeeInfoSystem.Application.Services
             if (recipientIds.Count == 0)
                 return Error.Validation("Не указаны получатели уведомления");
 
-            var notifications = recipientIds.Select(rid => new Notification
+            // Отправляем каждое уведомление через AddInboxAsync, 
+            // чтобы отправились и в базу, и в WebPush
+            foreach (var recipientId in recipientIds)
             {
-                RecipientId = rid,
-                SenderId = senderId,
-                Title = dto.Title,
-                Body = dto.Body,
-                IsRead = false,
-                CreatedAt = DateTime.UtcNow,
-                RequestId = null
-            });
+                await AddInboxAsync(recipientId, senderId, dto.Title, dto.Body);
+            }
 
-            await _uow.Notifications.AddRangeAsync(notifications);
             await _uow.SaveChangesAsync();
-
             return Result.Success();
         }
 
@@ -201,6 +207,21 @@ namespace EmployeeInfoSystem.Application.Services
 
             notification.IsRead = true;
             await _uow.Notifications.UpdateAsync(notification);
+            await _uow.SaveChangesAsync();
+
+            return Result.Success();
+        }
+
+        public async Task<Result> DeleteAsync(int notificationId, int userId)
+        {
+            var notification = await _uow.Notifications.GetByIdAsync(notificationId);
+            if (notification is null)
+                return Error.NotFound($"Уведомление {notificationId} не найдено");
+
+            if (notification.RecipientId != userId)
+                return Error.Forbidden("Нет доступа к этому уведомлению");
+
+            await _uow.Notifications.DeleteAsync(notificationId);
             await _uow.SaveChangesAsync();
 
             return Result.Success();

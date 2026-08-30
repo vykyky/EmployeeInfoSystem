@@ -28,3 +28,10 @@
     background-color: rgb(198, 198, 198);
     cursor: not-allowed;
 }
+
+@media (max-width: 640px) {
+  .btn {
+    font-size: 18px;
+    padding: 9px 18px;
+  }
+}

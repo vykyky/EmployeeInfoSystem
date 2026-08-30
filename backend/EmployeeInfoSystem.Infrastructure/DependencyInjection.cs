@@ -36,6 +36,7 @@ namespace EmployeeInfoSystem.Infrastructure
             services.AddScoped<IFileStorageService, LocalFileStorageService>();
             services.AddScoped<ITokenService, JwtTokenService>();
             services.AddScoped<ISyncService, SyncService>();
+            services.AddScoped<IPushNotificationService, PushNotificationService>();
 
             services.AddHostedService<SyncBackgroundService>();
             return services;

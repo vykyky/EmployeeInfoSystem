@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace EmployeeInfoSystem.Infrastructure.Persistence
 {
-    public class AppDbContext: DbContext
+    public class AppDbContext : DbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -23,6 +23,9 @@ namespace EmployeeInfoSystem.Infrastructure.Persistence
         public DbSet<Request> Requests => Set<Request>();
         public DbSet<RequestType> RequestTypes => Set<RequestType>();
         public DbSet<RecipientGroup> RecipientGroups => Set<RecipientGroup>();
+
+        // Добавляем таблицу подписок на push-уведомления
+        public DbSet<PushSubscriptionEntity> PushSubscriptions => Set<PushSubscriptionEntity>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -73,8 +76,8 @@ namespace EmployeeInfoSystem.Infrastructure.Persistence
                 entity.Property(x => x.Tabn).HasColumnName("tabn");
                 entity.Property(x => x.PasswordHash).HasColumnName("password_hash");
                 entity.Property(x => x.Role).HasColumnName("role");
-                entity.Property(x => x.Phone).HasColumnName("phone");      // добавил
-                entity.Property(x => x.Email).HasColumnName("email");      // добавил
+                entity.Property(x => x.Phone).HasColumnName("phone");
+                entity.Property(x => x.Email).HasColumnName("email");
                 entity.Property(x => x.PushToken).HasColumnName("push_token");
                 entity.Property(x => x.CreatedAt).HasColumnName("created_at");
                 entity.Property(x => x.LastLoginAt).HasColumnName("last_login_at");
@@ -137,13 +140,11 @@ namespace EmployeeInfoSystem.Infrastructure.Persistence
                       .HasForeignKey(x => x.RecipientId)
                       .OnDelete(DeleteBehavior.NoAction);
 
-                // Связываем свойство Sender с внешним ключом SenderId
                 entity.HasOne(x => x.Sender)
                       .WithMany()
                       .HasForeignKey(x => x.SenderId)
                       .OnDelete(DeleteBehavior.NoAction);
 
-                // Дополнительно: связываем свойство Request с внешним ключом RequestId
                 entity.HasOne(x => x.Request)
                       .WithMany()
                       .HasForeignKey(x => x.RequestId)
@@ -164,19 +165,16 @@ namespace EmployeeInfoSystem.Infrastructure.Persistence
                 entity.Property(x => x.CreatedAt).HasColumnName("created_at");
                 entity.Property(x => x.ResolvedAt).HasColumnName("resolved_at");
 
-                // Связи (Foreign Keys)
                 entity.HasOne(x => x.Employee)
                       .WithMany()
                       .HasForeignKey(x => x.EmployeeId)
                       .OnDelete(DeleteBehavior.NoAction);
 
-                // Связываем свойство Manager с внешним ключом ManagerId
                 entity.HasOne(x => x.Manager)
                       .WithMany()
                       .HasForeignKey(x => x.ManagerId)
                       .OnDelete(DeleteBehavior.NoAction);
 
-                // Связываем свойство RequestType с внешним ключом RequestTypeId
                 entity.HasOne(x => x.RequestType)
                       .WithMany()
                       .HasForeignKey(x => x.RequestTypeId)
@@ -193,16 +191,32 @@ namespace EmployeeInfoSystem.Infrastructure.Persistence
                 entity.Property(x => x.IsSystem).HasColumnName("is_system");
             });
 
-            
-
             modelBuilder.Entity<RecipientGroup>(entity =>
             {
-                entity.ToTable("recipient_groups"); // имя таблицы в БД
+                entity.ToTable("recipient_groups");
                 entity.Property(x => x.Id).HasColumnName("id");
                 entity.Property(x => x.Name).HasColumnName("name");
                 entity.Property(x => x.Department).HasColumnName("department");
                 entity.Property(x => x.Role).HasColumnName("role");
                 entity.Property(x => x.CreatedAt).HasColumnName("created_at");
+            });
+
+            // Настройка подписок push_subscriptions
+            modelBuilder.Entity<PushSubscriptionEntity>(entity =>
+            {
+                entity.ToTable("push_subscriptions");
+
+                entity.Property(x => x.Id).HasColumnName("id");
+                entity.Property(x => x.UserId).HasColumnName("user_id");
+                entity.Property(x => x.Endpoint).HasColumnName("endpoint");
+                entity.Property(x => x.P256dh).HasColumnName("p256dh");
+                entity.Property(x => x.Auth).HasColumnName("auth");
+                entity.Property(x => x.CreatedAt).HasColumnName("created_at");
+
+                entity.HasOne(x => x.User)
+                      .WithMany(u => u.PushSubscriptions)
+                      .HasForeignKey(x => x.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }
